@@ -1,3 +1,8 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Copyright (c) 2026 Pavlo Sytnyk.                                      #
+# Licensed under the MIT License. See LICENSE for license information.  #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 cmake_minimum_required(VERSION 3.10)
 project(img2txt LANGUAGES C)
 
