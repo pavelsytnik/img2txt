@@ -10,7 +10,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_C_EXTENSIONS OFF)
 
-add_subdirectory(dep/stb_image)
+add_subdirectory(third-party/stb_image)
 
 add_executable(img2txt src/main.c)
 
