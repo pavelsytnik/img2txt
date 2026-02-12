@@ -5,10 +5,12 @@
 
 #include <stb_image.h>
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <string.h>
 
 #define DEFAULT_OUT_WIDTH 60
@@ -18,8 +20,22 @@ struct args {
     int width;
 };
 
-void usage(const char *prog_name) {
+noreturn void usage(const char *prog_name) {
     fprintf(stderr, "Usage: %s [--width=INT] <FILENAME>\n", prog_name);
+    exit(EXIT_FAILURE);
+}
+
+noreturn void error(const char *fmt, ...) {
+    va_list v_args;
+    va_start(v_args, fmt);
+
+    fprintf(stderr, "Error: ");
+    vfprintf(stderr, fmt, v_args);
+    fprintf(stderr, "\n");
+
+    va_end(v_args);
+
+    exit(EXIT_FAILURE);
 }
 
 void args_init(struct args *args) {
@@ -39,7 +55,6 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
 
     if (argc < 2) {
         usage(argv[0]);
-        exit(EXIT_FAILURE);
     }
 
     for (int i = 1; i < argc; i++) {
@@ -50,8 +65,7 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
             int parsed_arg = atoi(argv[i] + width_prefix_len);
 
             if (parsed_arg <= 0) {
-                fprintf(stderr, "Error: width value must be a positive integer\n");
-                exit(EXIT_FAILURE);
+                error("Width value must be a positive integer\n");
             }
 
             out_args->width = parsed_arg;
@@ -63,15 +77,13 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
             continue;
         }
 
-        fprintf(stderr, "Error: too many arguments provided\n");
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+        error("Too many arguments provided\n");
+        // The usage was previously displayed here
     }
 
     if (!out_args->img_filename) {
-        fprintf(stderr, "Error: missing <FILENAME> argument\n");
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+        error("Missing <FILENAME> argument\n");
+        // The usage was previously displayed here
     }
 }
 
@@ -86,8 +98,7 @@ int main(int argc, char **argv) {
     stbi_uc *img_data = stbi_load(args.img_filename, &width, &height, &channel_count, 0);
 
     if (!img_data) {
-        fprintf(stderr, "Error: file '%s' does not exist\n", args.img_filename);
-        return EXIT_FAILURE;
+        error("File '%s' does not exist\n", args.img_filename);
     }
 
     char txt_art_filename[256];
@@ -96,9 +107,8 @@ int main(int argc, char **argv) {
     FILE *txt_art_file = fopen(txt_art_filename, "w");
 
     if (!txt_art_file) {
-        fprintf(stderr, "Error: failed to create file '%s'\n", txt_art_filename);
         stbi_image_free(img_data);
-        return EXIT_FAILURE;
+        error("Failed to create file '%s'\n", txt_art_filename);
     }
 
     int out_width = args.width;
