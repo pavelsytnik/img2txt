@@ -20,6 +20,13 @@ struct args {
     int width;
 };
 
+struct image {
+    int width;
+    int height;
+    int channel_count;
+    stbi_uc *data;
+};
+
 noreturn void usage(const char *prog_name) {
     fprintf(stderr, "Usage: %s [--width=INT] <FILENAME>\n", prog_name);
     exit(EXIT_FAILURE);
@@ -87,19 +94,20 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
     }
 }
 
+void image_load(const char *filename, struct image *out) {
+    out->data = stbi_load(filename, &out->width, &out->height, &out->channel_count, 0);
+
+    if (!out->data) {
+        error("File '%s' does not exist\n", filename);
+    }
+}
+
 int main(int argc, char **argv) {
     struct args args;
     parse_args(argc, argv, &args);
 
-    int width;
-    int height;
-    int channel_count;
-
-    stbi_uc *img_data = stbi_load(args.img_filename, &width, &height, &channel_count, 0);
-
-    if (!img_data) {
-        error("File '%s' does not exist\n", args.img_filename);
-    }
+    struct image img;
+    image_load(args.img_filename, &img);
 
     char txt_art_filename[256];
     snprintf(txt_art_filename, sizeof(txt_art_filename), "%s.txt", args.img_filename);
@@ -107,23 +115,23 @@ int main(int argc, char **argv) {
     FILE *txt_art_file = fopen(txt_art_filename, "w");
 
     if (!txt_art_file) {
-        stbi_image_free(img_data);
+        stbi_image_free(img.data);
         error("Failed to create file '%s'\n", txt_art_filename);
     }
 
     int out_width = args.width;
-    int out_height = height * out_width / width;
+    int out_height = img.height * out_width / img.width;
 
     for (int y = 0; y < out_height; y++) {
-        int src_y = y * width / out_width;
+        int src_y = y * img.width / out_width;
 
         for (int x = 0; x < out_width; x++) {
-            int src_x = x * width / out_width;
+            int src_x = x * img.width / out_width;
 
-            const stbi_uc *px_ptr = &img_data[(src_y * width + src_x) * channel_count];
+            const stbi_uc *px_ptr = &img.data[(src_y * img.width + src_x) * img.channel_count];
 
             uint8_t px_light;
-            if (channel_count < 3) {
+            if (img.channel_count < 3) {
                 px_light = px_ptr[0];
             } else {
                 px_light = (px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3;
@@ -140,7 +148,7 @@ int main(int argc, char **argv) {
     }
 
     fclose(txt_art_file);
-    stbi_image_free(img_data);
+    stbi_image_free(img.data);
 
     return EXIT_SUCCESS;
 }
