@@ -102,6 +102,35 @@ void image_load(const char *filename, struct image *out) {
     }
 }
 
+void write_ascii_art(FILE *dst, const struct image *img, int out_width) {
+    int out_height = img->height * out_width / img->width;
+
+    for (int y = 0; y < out_height; y++) {
+        int src_y = y * img->width / out_width;
+
+        for (int x = 0; x < out_width; x++) {
+            int src_x = x * img->width / out_width;
+
+            const stbi_uc *px_ptr = &img->data[(src_y * img->width + src_x) * img->channel_count];
+
+            uint8_t px_light;
+            if (img->channel_count < 3) {
+                px_light = px_ptr[0];
+            } else {
+                px_light = (px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3;
+            }
+
+            const char *ascii_ramp = "@%#*+=-:. ";
+            char ascii_light = ascii_ramp[px_light * strlen(ascii_ramp) / 256];
+
+            putc(ascii_light, dst);
+            putc(ascii_light, dst);
+        }
+
+        putc('\n', dst);
+    }
+}
+
 int main(int argc, char **argv) {
     struct args args;
     parse_args(argc, argv, &args);
@@ -119,33 +148,7 @@ int main(int argc, char **argv) {
         error("Failed to create file '%s'\n", txt_art_filename);
     }
 
-    int out_width = args.width;
-    int out_height = img.height * out_width / img.width;
-
-    for (int y = 0; y < out_height; y++) {
-        int src_y = y * img.width / out_width;
-
-        for (int x = 0; x < out_width; x++) {
-            int src_x = x * img.width / out_width;
-
-            const stbi_uc *px_ptr = &img.data[(src_y * img.width + src_x) * img.channel_count];
-
-            uint8_t px_light;
-            if (img.channel_count < 3) {
-                px_light = px_ptr[0];
-            } else {
-                px_light = (px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3;
-            }
-
-            const char *ascii_ramp = "@%#*+=-:. ";
-            char ascii_light = ascii_ramp[px_light * strlen(ascii_ramp) / 256];
-
-            putc(ascii_light, txt_art_file);
-            putc(ascii_light, txt_art_file);
-        }
-
-        putc('\n', txt_art_file);
-    }
+    write_ascii_art(txt_art_file, &img, args.width);
 
     fclose(txt_art_file);
     stbi_image_free(img.data);
