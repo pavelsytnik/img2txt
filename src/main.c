@@ -11,13 +11,50 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEFAULT_OUT_WIDTH 60
+
+void usage(const char *prog_name) {
+    fprintf(stderr, "Usage: %s [--width=INT] <FILENAME>\n", prog_name);
+}
+
 int main(int argc, char **argv) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <FILENAME>\n", argv[0]);
+        usage(argv[0]);
         return EXIT_FAILURE;
     }
 
-    const char *img_filename = argv[1];
+    size_t arg_idx = 1;
+
+    int opt_width = DEFAULT_OUT_WIDTH;
+
+    const char *width_prefix = "--width=";
+    size_t width_prefix_len = strlen(width_prefix);
+
+    if (!strncmp(argv[arg_idx], width_prefix, width_prefix_len)) {
+        int parsed_arg = atoi(argv[arg_idx] + width_prefix_len);
+
+        if (parsed_arg <= 0) {
+            fprintf(stderr, "Error: width value must be a positive integer\n");
+            return EXIT_FAILURE;
+        }
+
+        opt_width = parsed_arg;
+        arg_idx++;
+    }
+
+    const char *img_filename = argv[arg_idx];
+
+    if (!img_filename) {
+        fprintf(stderr, "Error: missing <FILENAME> argument\n");
+        usage(argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    if (argv[++arg_idx]) {
+        fprintf(stderr, "Error: too many arguments provided\n");
+        usage(argv[0]);
+        return EXIT_FAILURE;
+    }
 
     int width;
     int height;
@@ -41,9 +78,16 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            const stbi_uc *px_ptr = &img_data[(y * width + x) * channel_count];
+    int out_width = opt_width;
+    int out_height = height * out_width / width;
+
+    for (int y = 0; y < out_height; y++) {
+        int src_y = y * width / out_width;
+
+        for (int x = 0; x < out_width; x++) {
+            int src_x = x * width / out_width;
+
+            const stbi_uc *px_ptr = &img_data[(src_y * width + src_x) * channel_count];
 
             uint8_t px_light;
             if (channel_count < 3) {
