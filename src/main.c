@@ -72,7 +72,7 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
             int parsed_arg = atoi(argv[i] + width_prefix_len);
 
             if (parsed_arg <= 0) {
-                error("Width value must be a positive integer\n");
+                error("Width value must be a positive integer");
             }
 
             out_args->width = parsed_arg;
@@ -84,12 +84,12 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
             continue;
         }
 
-        error("Too many arguments provided\n");
+        error("Too many arguments provided");
         // The usage was previously displayed here
     }
 
     if (!out_args->img_filename) {
-        error("Missing <FILENAME> argument\n");
+        error("Missing <FILENAME> argument");
         // The usage was previously displayed here
     }
 }
@@ -98,7 +98,7 @@ void image_load(const char *filename, struct image *out) {
     out->data = stbi_load(filename, &out->width, &out->height, &out->channel_count, 0);
 
     if (!out->data) {
-        error("File '%s' does not exist\n", filename);
+        error("File '%s' does not exist", filename);
     }
 }
 
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
 
     if (!txt_art_file) {
         stbi_image_free(img.data);
-        error("Failed to create file '%s'\n", txt_art_filename);
+        error("Failed to create file '%s'", txt_art_filename);
     }
 
     write_ascii_art(txt_art_file, &img, args.width);
