@@ -17,6 +17,7 @@
 
 struct args {
     const char *img_filename;
+    double contrast;
     int width;
 };
 
@@ -47,6 +48,7 @@ noreturn void error(const char *fmt, ...) {
 
 void args_init(struct args *args) {
     args->img_filename = NULL;
+    args->contrast = 1.0;
     args->width = DEFAULT_OUT_WIDTH;
 }
 
@@ -65,17 +67,21 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
     }
 
     for (int i = 1; i < argc; i++) {
-        const char *width_prefix = "--width=";
-        size_t width_prefix_len = strlen(width_prefix);
-
-        if (!strncmp(argv[i], width_prefix, width_prefix_len)) {
-            int parsed_arg = atoi(argv[i] + width_prefix_len);
+        if (!strncmp(argv[i], "--width=", 8)) {
+            int parsed_arg = atoi(argv[i] + 8);
 
             if (parsed_arg <= 0) {
                 error("Width value must be a positive integer");
             }
 
             out_args->width = parsed_arg;
+            continue;
+        }
+
+        if (!strncmp(argv[i], "--contrast=", 11)) {
+            double parsed_arg = atof(argv[i] + 11);
+
+            out_args->contrast = parsed_arg;
             continue;
         }
 
@@ -102,7 +108,14 @@ void image_load(const char *filename, struct image *out) {
     }
 }
 
-void write_ascii_art(FILE *dst, const struct image *img, int out_width) {
+uint8_t adjust_contrast(uint8_t v, double contrast) {
+    double f = (v - 128.0) * contrast + 128.0;
+    if (f < 0.0) f = 0.0;
+    if (f > 255.0) f = 255.0;
+    return (uint8_t)f;
+}
+
+void write_ascii_art(FILE *dst, const struct image *img, int out_width, double contrast) {
     int out_height = img->height * out_width / img->width;
 
     for (int y = 0; y < out_height; y++) {
@@ -119,6 +132,8 @@ void write_ascii_art(FILE *dst, const struct image *img, int out_width) {
             } else {
                 px_light = (px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3;
             }
+
+            px_light = adjust_contrast(px_light, contrast);
 
             const char *ascii_ramp = "@%#*+=-:. ";
             char ascii_light = ascii_ramp[px_light * strlen(ascii_ramp) / 256];
@@ -148,7 +163,7 @@ int main(int argc, char **argv) {
         error("Failed to create file '%s'", txt_art_filename);
     }
 
-    write_ascii_art(txt_art_file, &img, args.width);
+    write_ascii_art(txt_art_file, &img, args.width, args.contrast);
 
     fclose(txt_art_file);
     stbi_image_free(img.data);
