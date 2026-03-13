@@ -1,0 +1,14 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright (c) 2026 Pavlo Sytnyk.                                      *
+ * Licensed under the MIT License. See LICENSE for license information.  *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifndef util_h__
+#define util_h__
+
+#include <stdnoreturn.h>
+
+noreturn void usage(const char *prog_name);
+noreturn void error(const char *fmt, ...);
+
+#endif // util_h__
