@@ -6,6 +6,7 @@
 #include <stb_image.h>
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,6 +20,7 @@ struct args {
     const char *img_filename;
     double contrast;
     int width;
+    bool use_weighted_grayscale;
 };
 
 struct image {
@@ -50,6 +52,7 @@ void args_init(struct args *args) {
     args->img_filename = NULL;
     args->contrast = 1.0;
     args->width = DEFAULT_OUT_WIDTH;
+    args->use_weighted_grayscale = false;
 }
 
 /*
@@ -85,6 +88,11 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
             continue;
         }
 
+        if (!strcmp(argv[i], "--weighted-grayscale")) {
+            out_args->use_weighted_grayscale = true;
+            continue;
+        }
+
         if (!out_args->img_filename) {
             out_args->img_filename = argv[i];
             continue;
@@ -115,7 +123,7 @@ uint8_t adjust_contrast(uint8_t v, double contrast) {
     return (uint8_t)f;
 }
 
-void write_ascii_art(FILE *dst, const struct image *img, int out_width, double contrast) {
+void write_ascii_art(FILE *dst, const struct image *img, int out_width, double contrast, bool use_weighted_grayscale) {
     int out_height = img->height * out_width / img->width;
 
     for (int y = 0; y < out_height; y++) {
@@ -130,7 +138,11 @@ void write_ascii_art(FILE *dst, const struct image *img, int out_width, double c
             if (img->channel_count < 3) {
                 px_light = px_ptr[0];
             } else {
-                px_light = (px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3;
+                if (use_weighted_grayscale) {
+                    px_light = (uint8_t)(0.299 * px_ptr[0] + 0.587 * px_ptr[1] + 0.114 * px_ptr[2]);
+                } else {
+                    px_light = (px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3;
+                }
             }
 
             px_light = adjust_contrast(px_light, contrast);
@@ -163,7 +175,7 @@ int main(int argc, char **argv) {
         error("Failed to create file '%s'", txt_art_filename);
     }
 
-    write_ascii_art(txt_art_file, &img, args.width, args.contrast);
+    write_ascii_art(txt_art_file, &img, args.width, args.contrast, args.use_weighted_grayscale);
 
     fclose(txt_art_file);
     stbi_image_free(img.data);
