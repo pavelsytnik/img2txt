@@ -56,7 +56,7 @@ void args_init(struct args *args) {
 }
 
 /*
-    Now this function successfully parses cases where the --width option comes
+    Now this function successfully parses cases where the options comes
     before or after the <FILENAME> argument.
 
     In the future, it is worth considering an order where the options come
@@ -123,7 +123,13 @@ uint8_t adjust_contrast(uint8_t v, double contrast) {
     return (uint8_t)f;
 }
 
-void write_ascii_art(FILE *dst, const struct image *img, int out_width, double contrast, bool use_weighted_grayscale) {
+void write_ascii_art(
+    FILE *dst,
+    const struct image *img,
+    int out_width,
+    double contrast,
+    bool use_weighted_grayscale
+) {
     int out_height = img->height * out_width / img->width;
 
     for (int y = 0; y < out_height; y++) {
@@ -141,7 +147,7 @@ void write_ascii_art(FILE *dst, const struct image *img, int out_width, double c
                 if (use_weighted_grayscale) {
                     px_light = (uint8_t)(0.299 * px_ptr[0] + 0.587 * px_ptr[1] + 0.114 * px_ptr[2]);
                 } else {
-                    px_light = (px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3;
+                    px_light = (uint8_t)((px_ptr[0] + px_ptr[1] + px_ptr[2]) / 3);
                 }
             }
 
