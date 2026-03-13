@@ -7,8 +7,6 @@
 
 #include "image.h"
 
-#include <stb_image.h>
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -36,7 +34,7 @@ void write_ascii_art(
         for (int x = 0; x < out_width; x++) {
             int src_x = x * img->width / out_width;
 
-            const stbi_uc *px_ptr = &img->data[(src_y * img->width + src_x) * img->channel_count];
+            const uint8_t *px_ptr = image_pixel(img, src_x, src_y);
 
             uint8_t px_light;
             if (img->channel_count < 3) {

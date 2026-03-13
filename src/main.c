@@ -8,8 +8,6 @@
 #include "image.h"
 #include "util.h"
 
-#include <stb_image.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,14 +24,14 @@ int main(int argc, char **argv) {
     FILE *txt_art_file = fopen(txt_art_filename, "w");
 
     if (!txt_art_file) {
-        stbi_image_free(img.data);
+        image_free(&img);
         error("Failed to create file '%s'", txt_art_filename);
     }
 
     write_ascii_art(txt_art_file, &img, args.width, args.contrast, args.use_weighted_grayscale);
 
     fclose(txt_art_file);
-    stbi_image_free(img.data);
+    image_free(&img);
 
     return EXIT_SUCCESS;
 }
