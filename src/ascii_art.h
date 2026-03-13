@@ -11,12 +11,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-void write_ascii_art(
-    FILE *dst,
-    const struct image *img,
-    int out_width,
-    double contrast,
-    bool use_weighted_grayscale
-);
+struct ascii_art_config {
+    int out_width;
+    double contrast;
+    bool use_weighted_grayscale;
+};
+
+void ascii_art_write(FILE *dst, const struct image *img, const struct ascii_art_config *config);
 
 #endif // ascii_art_h__

@@ -28,7 +28,15 @@ int main(int argc, char **argv) {
         error("Failed to create file '%s'", txt_art_filename);
     }
 
-    write_ascii_art(txt_art_file, &img, args.width, args.contrast, args.use_weighted_grayscale);
+    ascii_art_write(
+        txt_art_file,
+        &img,
+        &(struct ascii_art_config) {
+            .out_width = args.width,
+            .contrast = args.contrast,
+            .use_weighted_grayscale = args.use_weighted_grayscale
+        }
+    );
 
     fclose(txt_art_file);
     image_free(&img);
