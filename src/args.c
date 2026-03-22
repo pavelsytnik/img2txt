@@ -32,7 +32,7 @@ void parse_args(int argc, char const *const *argv, struct args *out_args) {
     args_init(out_args);
 
     if (argc < 2) {
-        usage(argv[0]);
+        usage();
     }
 
     for (int i = 1; i < argc; i++) {

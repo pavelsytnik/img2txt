@@ -10,8 +10,10 @@
 #include <stdlib.h>
 #include <stdnoreturn.h>
 
-noreturn void usage(const char *prog_name) {
-    fprintf(stderr, "Usage: %s [--width=INT] <FILENAME>\n", prog_name);
+noreturn void usage(void) {
+    const char *usage_text =
+        "Usage: img2txt [--width=INT] [--contrast=DOUBLE] [--weighted-grayscale] <FILENAME>";
+    fprintf(stderr, "%s\n", usage_text);
     exit(EXIT_FAILURE);
 }
 

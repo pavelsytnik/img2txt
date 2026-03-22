@@ -8,7 +8,7 @@
 
 #include <stdnoreturn.h>
 
-noreturn void usage(const char *prog_name);
+noreturn void usage(void);
 noreturn void error(const char *fmt, ...);
 
 #endif // util_h__
