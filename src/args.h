@@ -6,15 +6,6 @@
 #ifndef args_h__
 #define args_h__
 
-#include <stdbool.h>
-
-struct args {
-    const char *img_filename;
-    double contrast;
-    int width;
-    bool use_weighted_grayscale;
-};
-
-void parse_args(int argc, char const *const *argv, struct args *out_args);
+// A command line argument parser will be implemented here.
 
 #endif // args_h__
