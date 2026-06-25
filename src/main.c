@@ -16,14 +16,14 @@
 
 #define DEFAULT_OUT_WIDTH 60
 
-struct args {
+struct arguments {
     const char *img_filename;
     double contrast;
     int width;
     bool use_weighted_grayscale;
 };
 
-static void args_init(struct args *args) {
+static void arguments_init(struct arguments *args) {
     args->img_filename = NULL;
     args->contrast = 1.0;
     args->width = DEFAULT_OUT_WIDTH;
@@ -37,8 +37,8 @@ static void args_init(struct args *args) {
     In the future, it is worth considering an order where the options come
     strictly at the front.
 */
-static void parse_args(int argc, char const *const *argv, struct args *out_args) {
-    args_init(out_args);
+static void parse_args(int argc, char const *const *argv, struct arguments *out_args) {
+    arguments_init(out_args);
 
     if (argc < 2) {
         usage();
@@ -84,7 +84,7 @@ static void parse_args(int argc, char const *const *argv, struct args *out_args)
 }
 
 int main(int argc, char **argv) {
-    struct args args;
+    struct arguments args;
     parse_args(argc, argv, &args);
 
     struct image img;
