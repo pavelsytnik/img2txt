@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define KEY_WEIGHTED_GRAYSCALE 256
+
 #define DEFAULT_OUT_WIDTH 60
 
 struct arguments {
@@ -30,62 +32,64 @@ static void arguments_init(struct arguments *args) {
     args->use_weighted_grayscale = false;
 }
 
-/*
-    Now this function successfully parses cases where the options comes
-    before or after the <FILENAME> argument.
+static void parse_opt(int key, const char *arg, void *data) {
+    struct arguments *args = data;
 
-    In the future, it is worth considering an order where the options come
-    strictly at the front.
-*/
-static void parse_args(int argc, char const *const *argv, struct arguments *out_args) {
-    arguments_init(out_args);
-
-    if (argc < 2) {
-        usage();
-    }
-
-    for (int i = 1; i < argc; i++) {
-        if (!strncmp(argv[i], "--width=", 8)) {
-            int parsed_arg = atoi(argv[i] + 8);
+    switch (key) {
+        case 'w': {
+            int parsed_arg = atoi(arg);
 
             if (parsed_arg <= 0) {
                 error("Width value must be a positive integer");
             }
 
-            out_args->width = parsed_arg;
-            continue;
+            args->width = parsed_arg;
+            break;
         }
+        case 'c': {
+            double parsed_arg = atof(arg);
 
-        if (!strncmp(argv[i], "--contrast=", 11)) {
-            double parsed_arg = atof(argv[i] + 11);
-
-            out_args->contrast = parsed_arg;
-            continue;
+            args->contrast = parsed_arg;
+            break;
         }
-
-        if (!strcmp(argv[i], "--weighted-grayscale")) {
-            out_args->use_weighted_grayscale = true;
-            continue;
+        case KEY_WEIGHTED_GRAYSCALE: {
+            args->use_weighted_grayscale = true;
+            break;
         }
+        case ARGS_KEY_ARG: {
+            if (!args->img_filename) {
+                args->img_filename = arg;
+                break;
+            }
 
-        if (!out_args->img_filename) {
-            out_args->img_filename = argv[i];
-            continue;
+            error("Too many arguments provided");
+            break;
         }
-
-        error("Too many arguments provided");
-        // The usage was previously displayed here
-    }
-
-    if (!out_args->img_filename) {
-        error("Missing <FILENAME> argument");
-        // The usage was previously displayed here
     }
 }
 
 int main(int argc, char **argv) {
+    if (argc < 2) {
+        usage();
+    }
+
+    struct args_option options[] = {
+        { 'w', "width", "INT" },
+        { 'c', "contrast", "DOUBLE" },
+        { KEY_WEIGHTED_GRAYSCALE, "weighted-grayscale", 0 },
+        { 0 }
+    };
+
     struct arguments args;
-    parse_args(argc, argv, &args);
+    arguments_init(&args);
+
+    struct args_program program = { options, parse_opt, &args };
+
+    args_parse(&program, argc, argv);
+
+    if (!args.img_filename) {
+        error("Missing <FILENAME> argument");
+    }
 
     struct image img;
     image_load(args.img_filename, &img);
