@@ -65,6 +65,16 @@ static void parse_opt(int key, const char *arg, void *data) {
             error("Too many arguments provided");
             break;
         }
+        case ARGS_KEY_INIT: {
+            arguments_init(args);
+            break;
+        }
+        case ARGS_KEY_END: {
+            if (!args->img_filename) {
+                error("Missing <FILENAME> argument");
+            }
+            break;
+        }
     }
 }
 
@@ -81,15 +91,9 @@ int main(int argc, char **argv) {
     };
 
     struct arguments args;
-    arguments_init(&args);
 
     struct args_program program = { options, parse_opt, &args };
-
     args_parse(&program, argc, argv);
-
-    if (!args.img_filename) {
-        error("Missing <FILENAME> argument");
-    }
 
     struct image img;
     image_load(args.img_filename, &img);
