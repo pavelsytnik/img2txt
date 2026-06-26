@@ -11,6 +11,8 @@
 #include <string.h>
 
 void args_parse(const struct args_program *program, int argc, char const *const *argv) {
+    program->parser(ARGS_KEY_INIT, NULL, program->data);
+
     for (int i = 1; i < argc; i++) {
 
         if (!strncmp(argv[i], "--", 2)) {
@@ -33,4 +35,6 @@ void args_parse(const struct args_program *program, int argc, char const *const 
             program->parser(ARGS_KEY_ARG, argv[i], program->data);
         }
     }
+
+    program->parser(ARGS_KEY_END, NULL, program->data);
 }

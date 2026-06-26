@@ -7,6 +7,8 @@
 #define args_h__
 
 #define ARGS_KEY_ARG 0x80000000
+#define ARGS_KEY_INIT 0x80000001
+#define ARGS_KEY_END 0x80000002
 
 struct args_option;
 struct args_program;
