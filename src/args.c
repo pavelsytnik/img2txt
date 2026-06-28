@@ -7,6 +7,7 @@
 
 #include "util.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -16,6 +17,8 @@ void args_parse(const struct args_program *program, int argc, char const *const 
     for (int i = 1; i < argc; i++) {
 
         if (!strncmp(argv[i], "--", 2)) {
+            bool found = false;
+
             const char *name = argv[i] + 2;
             const char *eq = strchr(name, '=');
 
@@ -26,10 +29,19 @@ void args_parse(const struct args_program *program, int argc, char const *const 
                 if (strlen(opt->name) == name_len && !strncmp(opt->name, name, name_len)) {
                     const char *arg = opt->arg ? (eq ? eq + 1 : argv[++i]) : NULL;
 
+                    if (opt->arg && !arg) {
+                        error("Option '%.*s' requires an argument", name_len, name);
+                    }
+
                     program->parser(opt->key, arg, program->data);
 
+                    found = true;
                     break;
                 }
+            }
+
+            if (!found) {
+                error("Unrecognized option '%.*s'", name_len, name);
             }
         } else {
             program->parser(ARGS_KEY_ARG, argv[i], program->data);
