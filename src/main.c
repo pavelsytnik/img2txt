@@ -97,6 +97,17 @@ int main(int argc, char **argv) {
     struct image img;
     image_load(args.img_filename, &img);
 
+    struct ascii_art art;
+    ascii_art_create(
+        &art,
+        &img,
+        &(struct ascii_art_config) {
+            .out_width = args.width,
+            .contrast = args.contrast,
+            .use_weighted_grayscale = args.use_weighted_grayscale
+        }
+    );
+
     char txt_art_filename[256];
     snprintf(txt_art_filename, sizeof(txt_art_filename), "%s.txt", args.img_filename);
 
@@ -107,17 +118,10 @@ int main(int argc, char **argv) {
         error("Failed to create file '%s'", txt_art_filename);
     }
 
-    ascii_art_write(
-        txt_art_file,
-        &img,
-        &(struct ascii_art_config) {
-            .out_width = args.width,
-            .contrast = args.contrast,
-            .use_weighted_grayscale = args.use_weighted_grayscale
-        }
-    );
+    ascii_art_write(&art, txt_art_file);
 
     fclose(txt_art_file);
+    ascii_art_free(&art);
     image_free(&img);
 
     return EXIT_SUCCESS;

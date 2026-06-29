@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static uint8_t adjust_contrast(uint8_t v, double contrast) {
@@ -30,11 +31,23 @@ static uint8_t pixel_to_grayscale(const uint8_t *pixel, int channels, bool weigh
     return (uint8_t)((pixel[0] + pixel[1] + pixel[2]) / 3);
 }
 
-void ascii_art_write(FILE *dst, const struct image *img, const struct ascii_art_config *config) {
+void ascii_art_create(
+    struct ascii_art *art,
+    const struct image *img,
+    const struct ascii_art_config *config
+) {
     const char *ascii_ramp = "@%#*+=-:. ";
     const size_t ramp_len = strlen(ascii_ramp);
 
     int out_height = img->height * config->out_width / img->width;
+
+    art->width = config->out_width;
+    art->height = out_height;
+    art->buffer = malloc(art->width * art->height + 1);
+
+    art->buffer[art->width * art->height] = '\0';
+
+    char *buffer_ptr = art->buffer;
 
     for (int y = 0; y < out_height; y++) {
         int src_y = y * img->width / config->out_width;
@@ -52,10 +65,24 @@ void ascii_art_write(FILE *dst, const struct image *img, const struct ascii_art_
 
             char ascii_light = ascii_ramp[px_light * ramp_len / 256];
 
-            putc(ascii_light, dst);
-            putc(ascii_light, dst);
+            *buffer_ptr++ = ascii_light;
         }
+    }
+}
 
-        putc('\n', dst);
+void ascii_art_free(struct ascii_art *art) {
+    if (art && art->buffer) {
+        free(art->buffer);
+    }
+    art->buffer = NULL;
+}
+
+void ascii_art_write(const struct ascii_art *art, FILE *stream) {
+    for (int y = 0; y < art->height; y++) {
+        for (int x = 0; x < art->width; x++) {
+            putc(art->buffer[y * art->width + x], stream);
+            putc(art->buffer[y * art->width + x], stream);
+        }
+        putc('\n', stream);
     }
 }
