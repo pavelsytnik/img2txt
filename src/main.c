@@ -22,6 +22,7 @@ struct arguments {
     double contrast;
     int width;
     bool use_weighted_grayscale;
+    bool terminal_output;
 };
 
 static void arguments_init(struct arguments *args) {
@@ -29,6 +30,7 @@ static void arguments_init(struct arguments *args) {
     args->contrast = 1.0;
     args->width = DEFAULT_OUT_WIDTH;
     args->use_weighted_grayscale = false;
+    args->terminal_output = false;
 }
 
 static void parse_opt(int key, const char *arg, void *data) {
@@ -49,6 +51,10 @@ static void parse_opt(int key, const char *arg, void *data) {
             double parsed_arg = atof(arg);
 
             args->contrast = parsed_arg;
+            break;
+        }
+        case 't': {
+            args->terminal_output = true;
             break;
         }
         case KEY_WEIGHTED_GRAYSCALE: {
@@ -85,6 +91,7 @@ int main(int argc, char **argv) {
     struct args_option options[] = {
         { 'w', "width", "INT" },
         { 'c', "contrast", "DOUBLE" },
+        { 't', "terminal", 0 },
         { KEY_WEIGHTED_GRAYSCALE, "weighted-grayscale", 0 },
         { 0 }
     };
@@ -119,6 +126,10 @@ int main(int argc, char **argv) {
     }
 
     ascii_art_write(&art, txt_art_file);
+
+    if (args.terminal_output) {
+        ascii_art_write(&art, stdout);
+    }
 
     fclose(txt_art_file);
     ascii_art_free(&art);
