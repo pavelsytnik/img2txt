@@ -78,11 +78,17 @@ void ascii_art_free(struct ascii_art *art) {
 }
 
 void ascii_art_write(const struct ascii_art *art, FILE *stream) {
+    const char *p = art->buffer;
+
     for (int y = 0; y < art->height; y++) {
-        for (int x = 0; x < art->width; x++) {
-            putc(art->buffer[y * art->width + x], stream);
-            putc(art->buffer[y * art->width + x], stream);
+        const char *end = p + art->width;
+
+        while (p != end) {
+            char c = *p++;
+            putc(c, stream);
+            putc(c, stream);
         }
+
         putc('\n', stream);
     }
 }
