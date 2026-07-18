@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define ASCII_ART_RAMP_STANDARD "@%#*+=-:. "
+
 struct ascii_art {
     char *buffer;
     int width;
@@ -18,6 +20,7 @@ struct ascii_art {
 };
 
 struct ascii_art_config {
+    const char *ramp;
     int out_width;
     double contrast;
     bool use_weighted_grayscale;

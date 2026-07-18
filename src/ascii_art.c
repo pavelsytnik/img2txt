@@ -36,7 +36,7 @@ void ascii_art_create(
     const struct image *img,
     const struct ascii_art_config *config
 ) {
-    const char *ascii_ramp = "@%#*+=-:. ";
+    const char *ascii_ramp = config->ramp ? config->ramp : ASCII_ART_RAMP_STANDARD;
     const size_t ramp_len = strlen(ascii_ramp);
 
     int out_height = img->height * config->out_width / img->width;

@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
         &art,
         &img,
         &(struct ascii_art_config) {
+            .ramp = ASCII_ART_RAMP_STANDARD,
             .out_width = args.width,
             .contrast = args.contrast,
             .use_weighted_grayscale = args.use_weighted_grayscale
