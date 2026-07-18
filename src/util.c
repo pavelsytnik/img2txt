@@ -12,7 +12,7 @@
 
 noreturn void usage(void) {
     const char *usage_text =
-        "Usage: img2txt [--width=INT] [--contrast=DOUBLE] [--weighted-grayscale] <FILENAME>";
+        "Usage: img2txt [--width=INT] [--contrast=DOUBLE] [--terminal] [--weighted-grayscale] <FILENAME>";
     fprintf(stderr, "%s\n", usage_text);
     exit(EXIT_FAILURE);
 }
