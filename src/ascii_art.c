@@ -57,7 +57,7 @@ void ascii_art_create(
     char *buffer_ptr = art->buffer;
 
     for (int y = 0; y < out_height; y++) {
-        int src_y = y * img->width / out_width;
+        int src_y = y * img->height / out_height;
 
         for (int x = 0; x < out_width; x++) {
             int src_x = x * img->width / out_width;
