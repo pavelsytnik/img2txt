@@ -49,17 +49,18 @@ void ascii_art_create(
     const char *ascii_ramp = config->ramp ? config->ramp : ASCII_ART_RAMP_STANDARD;
     const size_t ramp_len = strlen(ascii_ramp);
 
-    int out_height = img->height * config->out_width / img->width;
+    int out_width = config->out_width;
+    int out_height = img->height * out_width / img->width;
 
-    ascii_art_init(art, config->out_width, out_height);
+    ascii_art_init(art, out_width, out_height);
 
     char *buffer_ptr = art->buffer;
 
     for (int y = 0; y < out_height; y++) {
-        int src_y = y * img->width / config->out_width;
+        int src_y = y * img->width / out_width;
 
-        for (int x = 0; x < config->out_width; x++) {
-            int src_x = x * img->width / config->out_width;
+        for (int x = 0; x < out_width; x++) {
+            int src_x = x * img->width / out_width;
 
             const uint8_t *px_ptr = image_pixel(img, src_x, src_y);
 
