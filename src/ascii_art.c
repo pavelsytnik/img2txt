@@ -71,9 +71,7 @@ void ascii_art_create(
 }
 
 void ascii_art_free(struct ascii_art *art) {
-    if (art && art->buffer) {
-        free(art->buffer);
-    }
+    free(art->buffer);
     art->buffer = NULL;
 }
 
