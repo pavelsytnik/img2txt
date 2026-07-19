@@ -31,6 +31,16 @@ static uint8_t pixel_to_grayscale(const uint8_t *pixel, int channels, bool weigh
     return (uint8_t)((pixel[0] + pixel[1] + pixel[2]) / 3);
 }
 
+static void ascii_art_init(struct ascii_art *art, int width, int height) {
+    art->width = width;
+    art->height = height;
+
+    size_t buffer_size = (size_t)width * height + 1;
+
+    art->buffer = malloc(buffer_size);
+    art->buffer[buffer_size - 1] = '\0';
+}
+
 void ascii_art_create(
     struct ascii_art *art,
     const struct image *img,
@@ -41,11 +51,7 @@ void ascii_art_create(
 
     int out_height = img->height * config->out_width / img->width;
 
-    art->width = config->out_width;
-    art->height = out_height;
-    art->buffer = malloc(art->width * art->height + 1);
-
-    art->buffer[art->width * art->height] = '\0';
+    ascii_art_init(art, config->out_width, out_height);
 
     char *buffer_ptr = art->buffer;
 
