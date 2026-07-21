@@ -58,6 +58,27 @@ static void ascii_art_init(struct ascii_art *art, int width, int height) {
     art->buffer[buffer_size - 1] = '\0';
 }
 
+static void ascii_art_sample_image(
+    const struct ascii_art *art,
+    const struct image *img,
+    const struct ascii_art_config *config
+) {
+    char *buffer = art->buffer;
+
+    for (int y = 0; y < art->height; y++) {
+        int img_y = y * img->height / art->height;
+
+        for (int x = 0; x < art->width; x++) {
+            int img_x = x * img->width / art->width;
+
+            const uint8_t *pixel = image_pixel(img, img_x, img_y);
+            char ascii = pixel_to_ascii(pixel, img->channel_count, config);
+
+            *buffer++ = ascii;
+        }
+    }
+}
+
 void ascii_art_create(
     struct ascii_art *art,
     const struct image *img,
@@ -68,21 +89,7 @@ void ascii_art_create(
 
     ascii_art_init(art, out_width, out_height);
 
-    char *buffer_ptr = art->buffer;
-
-    for (int y = 0; y < out_height; y++) {
-        int src_y = y * img->height / out_height;
-
-        for (int x = 0; x < out_width; x++) {
-            int src_x = x * img->width / out_width;
-
-            const uint8_t *px_ptr = image_pixel(img, src_x, src_y);
-
-            char ascii_light = pixel_to_ascii(px_ptr, img->channel_count, config);
-
-            *buffer_ptr++ = ascii_light;
-        }
-    }
+    ascii_art_sample_image(art, img, config);
 }
 
 void ascii_art_free(struct ascii_art *art) {
