@@ -31,6 +31,23 @@ static uint8_t pixel_to_grayscale(const uint8_t *pixel, int channels, bool weigh
     return (uint8_t)((pixel[0] + pixel[1] + pixel[2]) / 3);
 }
 
+static uint8_t pixel_to_ascii(
+    const uint8_t *pixel,
+    int channels,
+    const struct ascii_art_config *config
+) {
+    const char *ascii_ramp = config->ramp ? config->ramp : ASCII_ART_RAMP_STANDARD;
+    const size_t ramp_len = strlen(ascii_ramp);
+
+    uint8_t px_light = pixel_to_grayscale(
+        pixel, channels, config->use_weighted_grayscale
+    );
+
+    px_light = adjust_contrast(px_light, config->contrast);
+
+    return ascii_ramp[px_light * ramp_len / 256];
+}
+
 static void ascii_art_init(struct ascii_art *art, int width, int height) {
     art->width = width;
     art->height = height;
@@ -46,9 +63,6 @@ void ascii_art_create(
     const struct image *img,
     const struct ascii_art_config *config
 ) {
-    const char *ascii_ramp = config->ramp ? config->ramp : ASCII_ART_RAMP_STANDARD;
-    const size_t ramp_len = strlen(ascii_ramp);
-
     int out_width = config->out_width;
     int out_height = img->height * out_width / img->width;
 
@@ -64,13 +78,7 @@ void ascii_art_create(
 
             const uint8_t *px_ptr = image_pixel(img, src_x, src_y);
 
-            uint8_t px_light = pixel_to_grayscale(
-                px_ptr, img->channel_count, config->use_weighted_grayscale
-            );
-
-            px_light = adjust_contrast(px_light, config->contrast);
-
-            char ascii_light = ascii_ramp[px_light * ramp_len / 256];
+            char ascii_light = pixel_to_ascii(px_ptr, img->channel_count, config);
 
             *buffer_ptr++ = ascii_light;
         }
