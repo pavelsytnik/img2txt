@@ -14,6 +14,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct ascii_art_context {
+    const char *ramp;
+    size_t ramp_len;
+    double contrast;
+    bool use_weighted_grayscale;
+};
+
+static void ascii_art_context_init(
+    struct ascii_art_context *ctx,
+    const struct ascii_art_config *config
+) {
+    ctx->ramp = (config->ramp)
+        ? config->ramp
+        : ASCII_ART_RAMP_STANDARD;
+
+    ctx->ramp_len = strlen(ctx->ramp);
+
+    ctx->contrast = config->contrast;
+    ctx->use_weighted_grayscale = config->use_weighted_grayscale;
+}
+
 static uint8_t adjust_contrast(uint8_t v, double contrast) {
     double f = (v - 128.0) * contrast + 128.0;
     if (f < 0.0) f = 0.0;
@@ -34,18 +55,15 @@ static uint8_t pixel_to_grayscale(const uint8_t *pixel, int channels, bool weigh
 static uint8_t pixel_to_ascii(
     const uint8_t *pixel,
     int channels,
-    const struct ascii_art_config *config
+    const struct ascii_art_context *ctx
 ) {
-    const char *ascii_ramp = config->ramp ? config->ramp : ASCII_ART_RAMP_STANDARD;
-    const size_t ramp_len = strlen(ascii_ramp);
-
     uint8_t px_light = pixel_to_grayscale(
-        pixel, channels, config->use_weighted_grayscale
+        pixel, channels, ctx->use_weighted_grayscale
     );
 
-    px_light = adjust_contrast(px_light, config->contrast);
+    px_light = adjust_contrast(px_light, ctx->contrast);
 
-    return ascii_ramp[px_light * ramp_len / 256];
+    return ctx->ramp[px_light * ctx->ramp_len / 256];
 }
 
 static void ascii_art_init(struct ascii_art *art, int width, int height) {
@@ -61,7 +79,7 @@ static void ascii_art_init(struct ascii_art *art, int width, int height) {
 static void ascii_art_sample_image(
     const struct ascii_art *art,
     const struct image *img,
-    const struct ascii_art_config *config
+    const struct ascii_art_context *ctx
 ) {
     char *buffer = art->buffer;
 
@@ -72,7 +90,7 @@ static void ascii_art_sample_image(
             int img_x = x * img->width / art->width;
 
             const uint8_t *pixel = image_pixel(img, img_x, img_y);
-            char ascii = pixel_to_ascii(pixel, img->channel_count, config);
+            char ascii = pixel_to_ascii(pixel, img->channel_count, ctx);
 
             *buffer++ = ascii;
         }
@@ -84,12 +102,14 @@ void ascii_art_create(
     const struct image *img,
     const struct ascii_art_config *config
 ) {
+    struct ascii_art_context ctx;
+
     int out_width = config->out_width;
     int out_height = img->height * out_width / img->width;
 
     ascii_art_init(art, out_width, out_height);
-
-    ascii_art_sample_image(art, img, config);
+    ascii_art_context_init(&ctx, config);
+    ascii_art_sample_image(art, img, &ctx);
 }
 
 void ascii_art_free(struct ascii_art *art) {
