@@ -114,7 +114,7 @@ void ascii_art_create(
 
 void ascii_art_free(struct ascii_art *art) {
     free(art->buffer);
-    art->buffer = NULL;
+    memset(art, 0, sizeof(struct ascii_art));
 }
 
 void ascii_art_write(const struct ascii_art *art, FILE *stream) {

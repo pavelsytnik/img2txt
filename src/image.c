@@ -10,6 +10,7 @@
 #include <stb_image.h>
 
 #include <stdint.h>
+#include <string.h>
 
 void image_load(const char *filename, struct image *out) {
     out->data = stbi_load(filename, &out->width, &out->height, &out->channel_count, 0);
@@ -20,10 +21,8 @@ void image_load(const char *filename, struct image *out) {
 }
 
 void image_free(struct image *img) {
-    if (img && img->data) {
-        stbi_image_free(img->data);
-        img->data = NULL;
-    }
+    stbi_image_free(img->data);
+    memset(img, 0, sizeof(struct image));
 }
 
 const uint8_t *image_pixel(const struct image *img, int x, int y) {
