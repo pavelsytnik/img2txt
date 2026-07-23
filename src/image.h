@@ -6,15 +6,13 @@
 #ifndef image_h__
 #define image_h__
 
-#include <stb_image.h>
-
 #include <stdint.h>
 
 struct image {
     int width;
     int height;
     int channel_count;
-    stbi_uc *data;
+    uint8_t *data;
 };
 
 void image_load(const char *filename, struct image *out);
