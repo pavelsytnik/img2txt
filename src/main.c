@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
     char txt_art_filename[256];
     snprintf(txt_art_filename, sizeof(txt_art_filename), "%s.txt", args.img_filename);
 
-    FILE *txt_art_file = fopen(txt_art_filename, "w");
+    FILE *txt_art_file = img2txt_fopen(txt_art_filename, "w");
 
     if (!txt_art_file) {
         image_free(&img);
