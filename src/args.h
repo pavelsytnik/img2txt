@@ -6,6 +6,10 @@
 #ifndef args_h__
 #define args_h__
 
+#ifdef _WIN32
+#  define ARGS_PLATFORM_WINDOWS 1
+#endif
+
 #define ARGS_KEY_ARG 0x80000000
 #define ARGS_KEY_INIT 0x80000001
 #define ARGS_KEY_END 0x80000002
@@ -28,5 +32,12 @@ struct args_program {
 };
 
 void args_parse(const struct args_program *program, int argc, char const *const *argv);
+
+#ifdef ARGS_PLATFORM_WINDOWS
+
+void args_windows_args_fetch(int *out_argc, char ***out_argv);
+void args_windows_args_free(int *out_argc, char ***out_argv);
+
+#endif // ARGS_PLATFORM_WINDOWS
 
 #endif // args_h__

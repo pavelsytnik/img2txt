@@ -84,6 +84,10 @@ static void parse_opt(int key, const char *arg, void *data) {
 }
 
 int main(int argc, char **argv) {
+#ifdef ARGS_PLATFORM_WINDOWS
+    args_windows_args_fetch(&argc, &argv);
+#endif
+
     if (argc < 2) {
         usage();
     }
@@ -135,6 +139,10 @@ int main(int argc, char **argv) {
     fclose(txt_art_file);
     ascii_art_free(&art);
     image_free(&img);
+
+#ifdef ARGS_PLATFORM_WINDOWS
+    args_windows_args_free(&argc, &argv);
+#endif
 
     return EXIT_SUCCESS;
 }
