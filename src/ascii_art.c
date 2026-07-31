@@ -77,7 +77,7 @@ static void ascii_art_init(struct ascii_art *art, int width, int height) {
 }
 
 static void ascii_art_sample_image(
-    const struct ascii_art *art,
+    struct ascii_art *art,
     const struct image *img,
     const struct ascii_art_context *ctx
 ) {
