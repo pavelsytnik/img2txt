@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 
-void image_load(const char *filename, struct image *out) {
+void image_load(struct image *out, const char *filename) {
     out->data = stbi_load(filename, &out->width, &out->height, &out->channel_count, 0);
 
     if (!out->data) {

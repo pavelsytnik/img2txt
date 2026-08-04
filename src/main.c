@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
     args_parse(&program, argc, argv);
 
     struct image img;
-    image_load(args.img_filename, &img);
+    image_load(&img, args.img_filename);
 
     struct ascii_art art;
     ascii_art_create(

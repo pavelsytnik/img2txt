@@ -15,7 +15,7 @@ struct image {
     uint8_t *data;
 };
 
-void image_load(const char *filename, struct image *out);
+void image_load(struct image *out, const char *filename);
 void image_destroy(struct image *img);
 
 const uint8_t *image_pixel(const struct image *img, int x, int y);
