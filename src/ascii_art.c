@@ -112,7 +112,7 @@ void ascii_art_create(
     ascii_art_sample_image(art, img, &ctx);
 }
 
-void ascii_art_free(struct ascii_art *art) {
+void ascii_art_destroy(struct ascii_art *art) {
     free(art->buffer);
     memset(art, 0, sizeof(struct ascii_art));
 }

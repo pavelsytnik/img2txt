@@ -137,8 +137,8 @@ int main(int argc, char **argv) {
     }
 
     fclose(txt_art_file);
-    ascii_art_free(&art);
-    image_free(&img);
+    ascii_art_destroy(&art);
+    image_destroy(&img);
 
 #ifdef ARGS_PLATFORM_WINDOWS
     args_windows_args_free(&argc, &argv);

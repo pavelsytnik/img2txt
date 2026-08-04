@@ -20,7 +20,7 @@ void image_load(const char *filename, struct image *out) {
     }
 }
 
-void image_free(struct image *img) {
+void image_destroy(struct image *img) {
     stbi_image_free(img->data);
     memset(img, 0, sizeof(struct image));
 }
