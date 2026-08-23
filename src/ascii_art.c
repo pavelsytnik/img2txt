@@ -6,6 +6,7 @@
 #include "ascii_art.h"
 
 #include "image.h"
+#include "image_transform.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -83,13 +84,9 @@ static void ascii_art_sample_image(
 ) {
     char *buffer = art->buffer;
 
-    for (int y = 0; y < art->height; y++) {
-        int img_y = y * img->height / art->height;
-
-        for (int x = 0; x < art->width; x++) {
-            int img_x = x * img->width / art->width;
-
-            const uint8_t *pixel = image_pixel(img, img_x, img_y);
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+            const uint8_t *pixel = image_pixel(img, x, y);
             char ascii = pixel_to_ascii(pixel, img->channel_count, ctx);
 
             *buffer++ = ascii;
@@ -103,13 +100,19 @@ void ascii_art_create(
     const struct ascii_art_config *config
 ) {
     struct ascii_art_context ctx;
+    struct image resized_img;
 
     int out_width = config->out_width;
     int out_height = img->height * out_width / img->width;
 
     ascii_art_init(art, out_width, out_height);
     ascii_art_context_init(&ctx, config);
-    ascii_art_sample_image(art, img, &ctx);
+
+    image_resize(img, &resized_img, out_width, out_height, IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR);
+
+    ascii_art_sample_image(art, &resized_img, &ctx);
+
+    image_destroy(&resized_img);
 }
 
 void ascii_art_destroy(struct ascii_art *art) {

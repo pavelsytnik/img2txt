@@ -12,6 +12,6 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 add_subdirectory(third_party/stb_image)
 
-add_executable(img2txt src/main.c src/ascii_art.c src/args.c src/image.c src/util.c)
+add_executable(img2txt src/main.c src/ascii_art.c src/args.c src/image.c src/image_transform.c src/util.c)
 
 target_link_libraries(img2txt PRIVATE stb_image)
