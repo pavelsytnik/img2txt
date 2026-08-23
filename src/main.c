@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     FILE *txt_art_file = img2txt_fopen(txt_art_filename, "w");
 
     if (!txt_art_file) {
-        image_free(&img);
+        image_destroy(&img);
         error("Failed to create file '%s'", txt_art_filename);
     }
 
