@@ -3,8 +3,8 @@
  * Licensed under the MIT License. See LICENSE for license information.  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef util_h__
-#define util_h__
+#ifndef util__h_
+#define util__h_
 
 #include <stdio.h>
 #include <stdnoreturn.h>
@@ -14,4 +14,4 @@ noreturn void error(const char *fmt, ...);
 
 FILE *img2txt_fopen(const char *filename, const char *mode);
 
-#endif // util_h__
+#endif // util__h_

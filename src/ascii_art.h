@@ -3,8 +3,8 @@
  * Licensed under the MIT License. See LICENSE for license information.  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ascii_art_h__
-#define ascii_art_h__
+#ifndef ascii_art__h_
+#define ascii_art__h_
 
 #include "image.h"
 
@@ -33,4 +33,4 @@ void ascii_art_create(struct ascii_art *art,
 void ascii_art_destroy(struct ascii_art *art);
 void ascii_art_write(const struct ascii_art *art, FILE *stream);
 
-#endif // ascii_art_h__
+#endif // ascii_art__h_

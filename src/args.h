@@ -3,8 +3,8 @@
  * Licensed under the MIT License. See LICENSE for license information.  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef args_h__
-#define args_h__
+#ifndef args__h_
+#define args__h_
 
 #ifdef _WIN32
 #  define ARGS_PLATFORM_WINDOWS 1
@@ -40,4 +40,4 @@ void args_windows_args_free(int *out_argc, char ***out_argv);
 
 #endif // ARGS_PLATFORM_WINDOWS
 
-#endif // args_h__
+#endif // args__h_

@@ -3,8 +3,8 @@
  * Licensed under the MIT License. See LICENSE for license information.  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef image_h__
-#define image_h__
+#ifndef image__h_
+#define image__h_
 
 #include <stdint.h>
 
@@ -20,4 +20,4 @@ void image_destroy(struct image *img);
 
 const uint8_t *image_pixel(const struct image *img, int x, int y);
 
-#endif // image_h__
+#endif // image__h_
