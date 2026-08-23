@@ -18,6 +18,6 @@ struct image {
 void image_load(struct image *out, const char *filename);
 void image_destroy(struct image *img);
 
-const uint8_t *image_pixel(const struct image *img, int x, int y);
+uint8_t *image_pixel(const struct image *img, int x, int y);
 
 #endif // image__h_

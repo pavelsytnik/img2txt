@@ -25,6 +25,6 @@ void image_destroy(struct image *img) {
     memset(img, 0, sizeof(struct image));
 }
 
-const uint8_t *image_pixel(const struct image *img, int x, int y) {
+uint8_t *image_pixel(const struct image *img, int x, int y) {
     return &img->data[(y * img->width + x) * img->channel_count];
 }
