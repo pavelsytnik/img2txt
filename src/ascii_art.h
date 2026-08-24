@@ -24,6 +24,7 @@ struct ascii_art_config {
     int out_width;
     double contrast;
     bool use_weighted_grayscale;
+    bool box_filter;
 };
 
 void ascii_art_create(struct ascii_art *art,

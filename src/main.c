@@ -23,6 +23,7 @@ struct arguments {
     int width;
     bool use_weighted_grayscale;
     bool terminal_output;
+    bool box_filter;
 };
 
 static void arguments_init(struct arguments *args) {
@@ -31,6 +32,7 @@ static void arguments_init(struct arguments *args) {
     args->width = DEFAULT_OUT_WIDTH;
     args->use_weighted_grayscale = false;
     args->terminal_output = false;
+    args->box_filter = false;
 }
 
 static void parse_opt(int key, const char *arg, void *data) {
@@ -51,6 +53,10 @@ static void parse_opt(int key, const char *arg, void *data) {
             double parsed_arg = atof(arg);
 
             args->contrast = parsed_arg;
+            break;
+        }
+        case 'b': {
+            args->box_filter = true;
             break;
         }
         case 't': {
@@ -95,6 +101,7 @@ int main(int argc, char **argv) {
     struct args_option options[] = {
         { 'w', "width", "INT" },
         { 'c', "contrast", "DOUBLE" },
+        { 'b', "box-filter", 0 },
         { 't', "terminal", 0 },
         { KEY_WEIGHTED_GRAYSCALE, "weighted-grayscale", 0 },
         { 0 }
@@ -116,7 +123,8 @@ int main(int argc, char **argv) {
             .ramp = ASCII_ART_RAMP_STANDARD,
             .out_width = args.width,
             .contrast = args.contrast,
-            .use_weighted_grayscale = args.use_weighted_grayscale
+            .use_weighted_grayscale = args.use_weighted_grayscale,
+            .box_filter = args.box_filter
         }
     );
 

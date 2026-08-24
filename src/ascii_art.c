@@ -20,6 +20,7 @@ struct ascii_art_context {
     size_t ramp_len;
     double contrast;
     bool use_weighted_grayscale;
+    enum image_resize_filter filter;
 };
 
 static void ascii_art_context_init(
@@ -34,6 +35,9 @@ static void ascii_art_context_init(
 
     ctx->contrast = config->contrast;
     ctx->use_weighted_grayscale = config->use_weighted_grayscale;
+    ctx->filter = (config->box_filter)
+        ? IMAGE_RESIZE_FILTER_BOX
+        : IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR;
 }
 
 static uint8_t adjust_contrast(uint8_t v, double contrast) {
@@ -108,7 +112,7 @@ void ascii_art_create(
     ascii_art_init(art, out_width, out_height);
     ascii_art_context_init(&ctx, config);
 
-    image_resize(img, &resized_img, out_width, out_height, IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR);
+    image_resize(img, &resized_img, out_width, out_height, ctx.filter);
 
     ascii_art_sample_image(art, &resized_img, &ctx);
 
