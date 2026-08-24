@@ -7,7 +7,8 @@
 #define image_transform__h_
 
 enum image_resize_filter {
-    IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR
+    IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR,
+    IMAGE_RESIZE_FILTER_BOX
 };
 
 struct image;
