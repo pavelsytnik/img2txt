@@ -81,13 +81,11 @@ static void ascii_art_init(struct ascii_art *art, int width, int height) {
     art->buffer[buffer_size - 1] = '\0';
 }
 
-static void ascii_art_sample_image(
-    struct ascii_art *art,
+static void sample_image(
     const struct image *img,
+    char *buffer,
     const struct ascii_art_context *ctx
 ) {
-    char *buffer = art->buffer;
-
     for (int y = 0; y < img->height; y++) {
         for (int x = 0; x < img->width; x++) {
             const uint8_t *pixel = image_pixel(img, x, y);
@@ -114,7 +112,7 @@ void ascii_art_create(
 
     image_resize(img, &resized_img, out_width, out_height, ctx.filter);
 
-    ascii_art_sample_image(art, &resized_img, &ctx);
+    sample_image(&resized_img, art->buffer, &ctx);
 
     image_destroy(&resized_img);
 }
