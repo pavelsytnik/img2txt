@@ -96,13 +96,25 @@ static void sample_image(
     }
 }
 
+static void ascii_art_populate(
+    struct ascii_art *art,
+    const struct image *img,
+    const struct ascii_art_context *ctx
+) {
+    struct image resized_img;
+    image_resize(img, &resized_img, art->width, art->height, ctx->filter);
+
+    sample_image(&resized_img, art->buffer, ctx);
+
+    image_destroy(&resized_img);
+}
+
 void ascii_art_create(
     struct ascii_art *art,
     const struct image *img,
     const struct ascii_art_config *config
 ) {
     struct ascii_art_context ctx;
-    struct image resized_img;
 
     int out_width = config->out_width;
     int out_height = img->height * out_width / img->width;
@@ -110,11 +122,7 @@ void ascii_art_create(
     ascii_art_init(art, out_width, out_height);
     ascii_art_context_init(&ctx, config);
 
-    image_resize(img, &resized_img, out_width, out_height, ctx.filter);
-
-    sample_image(&resized_img, art->buffer, &ctx);
-
-    image_destroy(&resized_img);
+    ascii_art_populate(art, img, &ctx);
 }
 
 void ascii_art_destroy(struct ascii_art *art) {
