@@ -8,6 +8,7 @@
 #include "image.h"
 #include "image_transform.h"
 
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -117,7 +118,7 @@ void ascii_art_create(
     struct ascii_art_context ctx;
 
     int out_width = config->out_width;
-    int out_height = img->height * out_width / img->width;
+    int out_height = (int)round(img->height * out_width / (img->width * 2.0));
 
     ascii_art_init(art, out_width, out_height);
     ascii_art_context_init(&ctx, config);
@@ -138,7 +139,6 @@ void ascii_art_write(const struct ascii_art *art, FILE *stream) {
 
         while (p != end) {
             char c = *p++;
-            putc(c, stream);
             putc(c, stream);
         }
 
