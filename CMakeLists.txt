@@ -14,10 +14,10 @@ add_subdirectory(third_party/stb_image)
 
 add_executable(img2txt
     src/main.c
-    src/ascii_art.c
     src/args.c
     src/image.c
     src/image_transform.c
+    src/text_art.c
     src/util.c
 )
 

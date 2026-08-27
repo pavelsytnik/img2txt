@@ -4,8 +4,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "args.h"
-#include "ascii_art.h"
 #include "image.h"
+#include "text_art.h"
 #include "util.h"
 
 #include <stdbool.h>
@@ -115,12 +115,12 @@ int main(int argc, char **argv) {
     struct image img;
     image_load(&img, args.img_filename);
 
-    struct ascii_art art;
-    ascii_art_create(
+    struct text_art art;
+    text_art_create(
         &art,
         &img,
-        &(struct ascii_art_config) {
-            .ramp = ASCII_ART_RAMP_STANDARD,
+        &(struct text_art_config) {
+            .ramp = TEXT_ART_ASCII_RAMP_STANDARD,
             .out_width = args.width,
             .contrast = args.contrast,
             .use_weighted_grayscale = args.use_weighted_grayscale,
@@ -138,14 +138,14 @@ int main(int argc, char **argv) {
         error("Failed to create file '%s'", txt_art_filename);
     }
 
-    ascii_art_write(&art, txt_art_file);
+    text_art_write(&art, txt_art_file);
 
     if (args.terminal_output) {
-        ascii_art_write(&art, stdout);
+        text_art_write(&art, stdout);
     }
 
     fclose(txt_art_file);
-    ascii_art_destroy(&art);
+    text_art_destroy(&art);
     image_destroy(&img);
 
 #ifdef ARGS_PLATFORM_WINDOWS

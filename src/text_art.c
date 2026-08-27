@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See LICENSE for license information.  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ascii_art.h"
+#include "text_art.h"
 
 #include "image.h"
 #include "image_transform.h"
@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct ascii_art_context {
+struct text_art_context {
     const char *ramp;
     size_t ramp_len;
     double contrast;
@@ -24,13 +24,13 @@ struct ascii_art_context {
     enum image_resize_filter filter;
 };
 
-static void ascii_art_context_init(
-    struct ascii_art_context *ctx,
-    const struct ascii_art_config *config
+static void text_art_context_init(
+    struct text_art_context *ctx,
+    const struct text_art_config *config
 ) {
     ctx->ramp = (config->ramp)
         ? config->ramp
-        : ASCII_ART_RAMP_STANDARD;
+        : TEXT_ART_ASCII_RAMP_STANDARD;
 
     ctx->ramp_len = strlen(ctx->ramp);
 
@@ -58,10 +58,10 @@ static uint8_t pixel_to_grayscale(const uint8_t *pixel, int channels, bool weigh
     return (uint8_t)((pixel[0] + pixel[1] + pixel[2]) / 3);
 }
 
-static uint8_t pixel_to_ascii(
+static uint8_t pixel_to_glyph(
     const uint8_t *pixel,
     int channels,
-    const struct ascii_art_context *ctx
+    const struct text_art_context *ctx
 ) {
     uint8_t px_light = pixel_to_grayscale(
         pixel, channels, ctx->use_weighted_grayscale
@@ -72,7 +72,7 @@ static uint8_t pixel_to_ascii(
     return ctx->ramp[px_light * ctx->ramp_len / 256];
 }
 
-static void ascii_art_init(struct ascii_art *art, int width, int height) {
+static void text_art_init(struct text_art *art, int width, int height) {
     art->width = width;
     art->height = height;
 
@@ -85,22 +85,22 @@ static void ascii_art_init(struct ascii_art *art, int width, int height) {
 static void sample_image(
     const struct image *img,
     char *buffer,
-    const struct ascii_art_context *ctx
+    const struct text_art_context *ctx
 ) {
     for (int y = 0; y < img->height; y++) {
         for (int x = 0; x < img->width; x++) {
             const uint8_t *pixel = image_pixel(img, x, y);
-            char ascii = pixel_to_ascii(pixel, img->channel_count, ctx);
+            char glyph = pixel_to_glyph(pixel, img->channel_count, ctx);
 
-            *buffer++ = ascii;
+            *buffer++ = glyph;
         }
     }
 }
 
-static void ascii_art_populate(
-    struct ascii_art *art,
+static void text_art_populate(
+    struct text_art *art,
     const struct image *img,
-    const struct ascii_art_context *ctx
+    const struct text_art_context *ctx
 ) {
     struct image resized_img;
     image_resize(img, &resized_img, art->width, art->height, ctx->filter);
@@ -110,28 +110,28 @@ static void ascii_art_populate(
     image_destroy(&resized_img);
 }
 
-void ascii_art_create(
-    struct ascii_art *art,
+void text_art_create(
+    struct text_art *art,
     const struct image *img,
-    const struct ascii_art_config *config
+    const struct text_art_config *config
 ) {
-    struct ascii_art_context ctx;
+    struct text_art_context ctx;
 
     int out_width = config->out_width;
     int out_height = (int)round(img->height * out_width / (img->width * 2.0));
 
-    ascii_art_init(art, out_width, out_height);
-    ascii_art_context_init(&ctx, config);
+    text_art_init(art, out_width, out_height);
+    text_art_context_init(&ctx, config);
 
-    ascii_art_populate(art, img, &ctx);
+    text_art_populate(art, img, &ctx);
 }
 
-void ascii_art_destroy(struct ascii_art *art) {
+void text_art_destroy(struct text_art *art) {
     free(art->buffer);
-    memset(art, 0, sizeof(struct ascii_art));
+    memset(art, 0, sizeof(struct text_art));
 }
 
-void ascii_art_write(const struct ascii_art *art, FILE *stream) {
+void text_art_write(const struct text_art *art, FILE *stream) {
     const char *p = art->buffer;
 
     for (int y = 0; y < art->height; y++) {
