@@ -93,24 +93,24 @@ static void image_resize_box(const struct image *src, struct image *dst) {
     }
 }
 
-void image_resize(
+void image_resized(
+    struct image *out,
     const struct image *src,
-    struct image *dst,
     int width,
     int height,
     enum image_resize_filter filter
 ) {
-    dst->width = width;
-    dst->height = height;
-    dst->channel_count = src->channel_count;
-    dst->data = malloc(width * height * dst->channel_count);
+    out->width = width;
+    out->height = height;
+    out->channel_count = src->channel_count;
+    out->data = malloc(width * height * out->channel_count);
 
     switch (filter) {
     case IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR:
-        image_resize_nearest_neighbor(src, dst);
+        image_resize_nearest_neighbor(src, out);
         break;
     case IMAGE_RESIZE_FILTER_BOX:
-        image_resize_box(src, dst);
+        image_resize_box(src, out);
         break;
     default:
         error("Invalid image resize filter value");

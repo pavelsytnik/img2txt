@@ -103,7 +103,7 @@ static void text_art_populate(
     const struct text_art_context *ctx
 ) {
     struct image resized_img;
-    image_resize(img, &resized_img, art->width, art->height, ctx->filter);
+    image_resized(&resized_img, img, art->width, art->height, ctx->filter);
 
     sample_image(&resized_img, art->buffer, ctx);
 

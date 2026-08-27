@@ -13,9 +13,9 @@ enum image_resize_filter {
 
 struct image;
 
-void image_resize(
+void image_resized(
+    struct image *out,
     const struct image *src,
-    struct image *dst,
     int width,
     int height,
     enum image_resize_filter filter
