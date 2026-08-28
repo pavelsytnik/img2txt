@@ -13,6 +13,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _WIN32
+  #include <windows.h>
+#endif
+
 #define KEY_WEIGHTED_GRAYSCALE 256
 #define KEY_BLOCK_RAMP 257
 
@@ -99,6 +103,7 @@ static void parse_opt(int key, const char *arg, void *data) {
 int main(int argc, char **argv) {
 #ifdef ARGS_PLATFORM_WINDOWS
     args_windows_args_fetch(&argc, &argv);
+    SetConsoleOutputCP(CP_UTF8);
 #endif
 
     if (argc < 2) {
