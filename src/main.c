@@ -14,6 +14,7 @@
 #include <stdlib.h>
 
 #define KEY_WEIGHTED_GRAYSCALE 256
+#define KEY_BLOCK_RAMP 257
 
 #define DEFAULT_OUT_WIDTH 60
 
@@ -24,6 +25,7 @@ struct arguments {
     bool use_weighted_grayscale;
     bool terminal_output;
     bool box_filter;
+    bool block_ramp;
 };
 
 static void arguments_init(struct arguments *args) {
@@ -33,6 +35,7 @@ static void arguments_init(struct arguments *args) {
     args->use_weighted_grayscale = false;
     args->terminal_output = false;
     args->box_filter = false;
+    args->block_ramp = false;
 }
 
 static void parse_opt(int key, const char *arg, void *data) {
@@ -65,6 +68,10 @@ static void parse_opt(int key, const char *arg, void *data) {
         }
         case KEY_WEIGHTED_GRAYSCALE: {
             args->use_weighted_grayscale = true;
+            break;
+        }
+        case KEY_BLOCK_RAMP: {
+            args->block_ramp = true;
             break;
         }
         case ARGS_KEY_ARG: {
@@ -104,6 +111,7 @@ int main(int argc, char **argv) {
         { 'b', "box-filter", 0 },
         { 't', "terminal", 0 },
         { KEY_WEIGHTED_GRAYSCALE, "weighted-grayscale", 0 },
+        { KEY_BLOCK_RAMP, "block-ramp", 0 },
         { 0 }
     };
 
@@ -120,7 +128,9 @@ int main(int argc, char **argv) {
         &art,
         &img,
         &(struct text_art_config) {
-            .ramp = TEXT_ART_ASCII_RAMP_STANDARD,
+            .ramp = (args.block_ramp)
+                ? TEXT_ART_BLOCK_RAMP
+                : TEXT_ART_ASCII_RAMP_STANDARD,
             .out_width = args.width,
             .contrast = args.contrast,
             .use_weighted_grayscale = args.use_weighted_grayscale,

@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #define TEXT_ART_ASCII_RAMP_STANDARD "@%#*+=-:. "
+#define TEXT_ART_BLOCK_RAMP "█▓▒░ "
 
 struct text_art {
     char *buffer;
