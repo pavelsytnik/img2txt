@@ -17,7 +17,7 @@
   #include <windows.h>
 #endif
 
-#define KEY_WEIGHTED_GRAYSCALE 256
+#define KEY_NO_WEIGHTED_GRAYSCALE 256
 #define KEY_BLOCK_RAMP 257
 
 #define DEFAULT_OUT_WIDTH 60
@@ -36,9 +36,9 @@ static void arguments_init(struct arguments *args) {
     args->img_filename = NULL;
     args->contrast = 1.0;
     args->width = DEFAULT_OUT_WIDTH;
-    args->use_weighted_grayscale = false;
+    args->use_weighted_grayscale = true;
     args->terminal_output = false;
-    args->box_filter = false;
+    args->box_filter = true;
     args->block_ramp = false;
 }
 
@@ -63,15 +63,15 @@ static void parse_opt(int key, const char *arg, void *data) {
             break;
         }
         case 'b': {
-            args->box_filter = true;
+            args->box_filter = false;
             break;
         }
         case 't': {
             args->terminal_output = true;
             break;
         }
-        case KEY_WEIGHTED_GRAYSCALE: {
-            args->use_weighted_grayscale = true;
+        case KEY_NO_WEIGHTED_GRAYSCALE: {
+            args->use_weighted_grayscale = false;
             break;
         }
         case KEY_BLOCK_RAMP: {
@@ -113,9 +113,9 @@ int main(int argc, char **argv) {
     struct args_option options[] = {
         { 'w', "width", "INT" },
         { 'c', "contrast", "DOUBLE" },
-        { 'b', "box-filter", 0 },
+        { 'b', "no-box-filter", 0 },
         { 't', "terminal", 0 },
-        { KEY_WEIGHTED_GRAYSCALE, "weighted-grayscale", 0 },
+        { KEY_NO_WEIGHTED_GRAYSCALE, "no-weighted-grayscale", 0 },
         { KEY_BLOCK_RAMP, "block-ramp", 0 },
         { 0 }
     };
