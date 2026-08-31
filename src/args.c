@@ -65,7 +65,9 @@ void args_windows_args_fetch(int *out_argc, char ***out_argv) {
 
     wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
-    argv = malloc(sizeof(char *) * argc);
+    argv = malloc(sizeof(char *) * (argc + 1));
+
+    argv[argc] = NULL;
 
     for (int i = 0; i < argc; i++) {
         int arg_size = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, NULL, 0, NULL, NULL);
