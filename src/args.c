@@ -17,6 +17,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct args_parser {
+    const struct args_program *program;
+    const char *const *argv;
+    int argc;
+    int argi;
+};
+
 static bool option_matches(const char *arg, const char *name) {
     arg += 2;
 
@@ -42,36 +49,59 @@ static const struct args_option *args_option_find(
     return NULL;
 }
 
+static void args_parser_parse_longopt(struct args_parser *parser) {
+    const char *name = parser->argv[parser->argi] + 2;
+    const char *eq = strchr(name, '=');
+
+    size_t name_len = (eq) ? (size_t)(eq - name) : strlen(name);
+
+    const struct args_option *opt = args_option_find(
+        parser->program->options,
+        parser->argv[parser->argi]
+    );
+
+    if (!opt) {
+        error("Unrecognized option '%.*s'", name_len, name);
+    }
+
+    const char *arg = NULL;
+
+    if (opt->arg) {
+        arg = (eq) ? eq + 1 : parser->argv[++parser->argi];
+        if (!arg) {
+            error("Option '%.*s' requires an argument", name_len, name);
+        }
+    }
+
+    parser->program->parser(opt->key, arg, parser->program->data);
+}
+
+static bool args_parser_parse_next(struct args_parser *parser) {
+    if (parser->argi >= parser->argc) {
+        return false;
+    }
+
+    if (!strncmp(parser->argv[parser->argi], "--", 2)) {
+        args_parser_parse_longopt(parser);
+    } else {
+        parser->program->parser(
+            ARGS_KEY_ARG,
+            parser->argv[parser->argi],
+            parser->program->data
+        );
+    }
+
+    parser->argi++;
+    return true;
+}
+
 void args_parse(const struct args_program *program, int argc, char const *const *argv) {
     program->parser(ARGS_KEY_INIT, NULL, program->data);
 
-    for (int i = 1; i < argc; i++) {
+    struct args_parser parser = { program, argv, argc, 1 };
 
-        if (!strncmp(argv[i], "--", 2)) {
-            const char *name = argv[i] + 2;
-            const char *eq = strchr(name, '=');
-
-            size_t name_len = eq ? (size_t)(eq - name) : strlen(name);
-
-            const struct args_option *opt = args_option_find(program->options, argv[i]);
-            if (!opt) {
-                error("Unrecognized option '%.*s'", name_len, name);
-            }
-
-            const char *arg = NULL;
-
-            if (opt->arg) {
-                arg = (eq) ? eq + 1 : argv[++i];
-                if (!arg) {
-                    error("Option '%.*s' requires an argument", name_len, name);
-                }
-            }
-
-            program->parser(opt->key, arg, program->data);
-        } else {
-            program->parser(ARGS_KEY_ARG, argv[i], program->data);
-        }
-    }
+    while (args_parser_parse_next(&parser))
+        ;
 
     program->parser(ARGS_KEY_END, NULL, program->data);
 }
