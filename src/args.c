@@ -91,12 +91,7 @@ static void args_parser_parse_longopt(struct args_parser *parser) {
 }
 
 static void args_parser_parse_shortopt(struct args_parser *parser) {
-    if (!*parser->nextchar) {
-        parser->nextchar = NULL;
-        return;
-    }
-
-    char c = *parser->nextchar++;
+    char c = *parser->nextchar;
 
     const struct args_option *opt = args_option_find_by_key(
         parser->program->options,
@@ -107,21 +102,27 @@ static void args_parser_parse_shortopt(struct args_parser *parser) {
         error("Unrecognized option '%c'", c);
     }
 
-    const char *arg = NULL;
+    parser->nextchar++;
+    if (*parser->nextchar == '\0') {
+        parser->nextchar = NULL;
+    }
+
+    const char *optarg = NULL;
 
     if (opt->arg) {
-        arg = (*parser->nextchar)
-            ? parser->nextchar
-            : parser->argv[++parser->argi];
-
-        if (!arg) {
+        if (parser->nextchar) {
+            optarg = parser->nextchar;
+        } else if (parser->argi + 1 < parser->argc) {
+            parser->argi++;
+            optarg = parser->argv[parser->argi];
+        } else {
             error("Option '%c' requires an argument", c);
         }
 
         parser->nextchar = NULL;
     }
 
-    parser->program->parser(opt->key, arg, parser->program->data);
+    parser->program->parser(opt->key, optarg, parser->program->data);
 }
 
 static bool args_parser_parse_next(struct args_parser *parser) {
