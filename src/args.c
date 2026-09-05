@@ -23,6 +23,7 @@ struct args_parser {
     int argc;
     int argi;
     int subopt;
+    bool stop_options;
 };
 
 static bool option_matches(const char *arg, const char *name) {
@@ -134,7 +135,16 @@ static bool args_parser_parse_next(struct args_parser *parser) {
 
     const char *arg = parser->argv[parser->argi];
 
-    if (!strncmp(arg, "--", 2)) {
+    if (parser->stop_options) {
+        parser->argi++;
+        parser->program->parser(ARGS_KEY_ARG, arg, parser->program->data);
+        return true;
+    }
+
+    if (!strcmp(arg, "--")) {
+        parser->stop_options = true;
+        parser->argi++;
+    } else if (!strncmp(arg, "--", 2)) {
         args_parser_parse_longopt(parser);
     } else if (arg[0] == '-' && arg[1] != '\0') {
         if (parser->subopt == 0) {
@@ -152,7 +162,7 @@ static bool args_parser_parse_next(struct args_parser *parser) {
 void args_parse(const struct args_program *program, int argc, char const *const *argv) {
     program->parser(ARGS_KEY_INIT, NULL, program->data);
 
-    struct args_parser parser = { program, argv, argc, 1, 0 };
+    struct args_parser parser = { program, argv, argc, 1, 0, false };
 
     while (args_parser_parse_next(&parser))
         ;
