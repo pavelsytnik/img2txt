@@ -22,7 +22,7 @@ struct args_parser {
     const char *const *argv;
     int argc;
     int argi;
-    const char *nextchar;
+    int subopt;
 };
 
 static bool option_matches(const char *arg, const char *name) {
@@ -91,35 +91,35 @@ static void args_parser_parse_longopt(struct args_parser *parser) {
 }
 
 static void args_parser_parse_shortopt(struct args_parser *parser) {
-    char c = *parser->nextchar;
+    const char *optopt = parser->argv[parser->argi] + parser->subopt;
 
     const struct args_option *opt = args_option_find_by_key(
         parser->program->options,
-        c & 0xFF
+        optopt[0] & 0xFF
     );
 
     if (!opt) {
-        error("Unrecognized option '%c'", c);
-    }
-
-    parser->nextchar++;
-    if (*parser->nextchar == '\0') {
-        parser->nextchar = NULL;
+        error("Unrecognized option '%c'", optopt[0]);
     }
 
     const char *optarg = NULL;
 
     if (opt->arg) {
-        if (parser->nextchar) {
-            optarg = parser->nextchar;
+        if (optopt[1]) {
+            optarg = &optopt[1];
         } else if (parser->argi + 1 < parser->argc) {
             parser->argi++;
             optarg = parser->argv[parser->argi];
         } else {
-            error("Option '%c' requires an argument", c);
+            error("Option '%c' requires an argument", optopt[0]);
         }
+    }
 
-        parser->nextchar = NULL;
+    if (opt->arg || !optopt[1]) {
+        parser->subopt = 0;
+        parser->argi++;
+    } else {
+        parser->subopt++;
     }
 
     parser->program->parser(opt->key, optarg, parser->program->data);
@@ -133,8 +133,8 @@ static bool args_parser_parse_next(struct args_parser *parser) {
     if (!strncmp(parser->argv[parser->argi], "--", 2)) {
         args_parser_parse_longopt(parser);
     } else if (parser->argv[parser->argi][0] == '-' && parser->argv[parser->argi][1] != '\0') {
-        parser->nextchar = parser->argv[parser->argi] + 1;
-        while (parser->nextchar) {
+        parser->subopt = 1;
+        while (parser->subopt != 0) {
             args_parser_parse_shortopt(parser);
         }
     } else {
@@ -152,7 +152,7 @@ static bool args_parser_parse_next(struct args_parser *parser) {
 void args_parse(const struct args_program *program, int argc, char const *const *argv) {
     program->parser(ARGS_KEY_INIT, NULL, program->data);
 
-    struct args_parser parser = { program, argv, argc, 1, NULL };
+    struct args_parser parser = { program, argv, argc, 1, 0 };
 
     while (args_parser_parse_next(&parser))
         ;
