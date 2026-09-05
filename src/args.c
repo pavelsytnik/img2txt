@@ -131,7 +131,7 @@ static bool args_parser_parse_next(struct args_parser *parser) {
 
     if (!strncmp(parser->argv[parser->argi], "--", 2)) {
         args_parser_parse_longopt(parser);
-    } else if (!strncmp(parser->argv[parser->argi], "-", 1)) {
+    } else if (parser->argv[parser->argi][0] == '-' && parser->argv[parser->argi][1] != '\0') {
         parser->nextchar = parser->argv[parser->argi] + 1;
         while (parser->nextchar) {
             args_parser_parse_shortopt(parser);
