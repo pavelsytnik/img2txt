@@ -87,6 +87,8 @@ static void args_parser_parse_longopt(struct args_parser *parser) {
         }
     }
 
+    parser->argi++;
+
     parser->program->parser(opt->key, arg, parser->program->data);
 }
 
@@ -130,22 +132,20 @@ static bool args_parser_parse_next(struct args_parser *parser) {
         return false;
     }
 
-    if (!strncmp(parser->argv[parser->argi], "--", 2)) {
+    const char *arg = parser->argv[parser->argi];
+
+    if (!strncmp(arg, "--", 2)) {
         args_parser_parse_longopt(parser);
-    } else if (parser->argv[parser->argi][0] == '-' && parser->argv[parser->argi][1] != '\0') {
-        parser->subopt = 1;
-        while (parser->subopt != 0) {
-            args_parser_parse_shortopt(parser);
+    } else if (arg[0] == '-' && arg[1] != '\0') {
+        if (parser->subopt == 0) {
+            parser->subopt = 1;
         }
+        args_parser_parse_shortopt(parser);
     } else {
-        parser->program->parser(
-            ARGS_KEY_ARG,
-            parser->argv[parser->argi],
-            parser->program->data
-        );
+        parser->argi++;
+        parser->program->parser(ARGS_KEY_ARG, arg, parser->program->data);
     }
 
-    parser->argi++;
     return true;
 }
 
