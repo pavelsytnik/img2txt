@@ -26,24 +26,22 @@ struct args_parser {
     bool stop_options;
 };
 
-static bool option_matches(const char *arg, const char *name) {
-    arg += 2;
-
-    while (*arg && *name && *arg != '=') {
-        if (*arg++ != *name++) {
+static bool longopts_match(const char *opt, const char *name) {
+    while (*opt && *name && *opt != '=') {
+        if (*opt++ != *name++) {
             return false;
         }
     }
 
-    return *name == '\0' && (*arg == '\0' || *arg == '=');
+    return *name == '\0' && (*opt == '\0' || *opt == '=');
 }
 
-static const struct args_option *args_option_find(
+static const struct args_option *args_option_find_by_name(
     const struct args_option *opts,
-    const char *arg
+    const char *name
 ) {
     for (int i = 0; opts[i].key; i++) {
-        if (option_matches(arg, opts[i].name)) {
+        if (longopts_match(name, opts[i].name)) {
             return &opts[i];
         }
     }
@@ -70,27 +68,31 @@ static void args_parser_parse_longopt(struct args_parser *parser) {
 
     size_t name_len = (eq) ? (size_t)(eq - name) : strlen(name);
 
-    const struct args_option *opt = args_option_find(
+    const struct args_option *opt = args_option_find_by_name(
         parser->program->options,
-        parser->argv[parser->argi]
+        name
     );
 
     if (!opt) {
         error("Unrecognized option '%.*s'", name_len, name);
     }
 
-    const char *arg = NULL;
+    const char *optarg = NULL;
 
     if (opt->arg) {
-        arg = (eq) ? eq + 1 : parser->argv[++parser->argi];
-        if (!arg) {
+        if (eq) {
+            optarg = eq + 1;
+        } else if (parser->argi + 1 < parser->argc) {
+            parser->argi++;
+            optarg = parser->argv[parser->argi];
+        } else {
             error("Option '%.*s' requires an argument", name_len, name);
         }
     }
 
     parser->argi++;
 
-    parser->program->parser(opt->key, arg, parser->program->data);
+    parser->program->parser(opt->key, optarg, parser->program->data);
 }
 
 static void args_parser_parse_shortopt(struct args_parser *parser) {
