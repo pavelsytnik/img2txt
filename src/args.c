@@ -130,18 +130,25 @@ static void args_parser_parse_shortopt(struct args_parser *parser) {
     parser->program->parser(opt->key, optarg, parser->program->data);
 }
 
+static void args_parser_parse_arg(struct args_parser *parser) {
+    parser->program->parser(
+        ARGS_KEY_ARG,
+        parser->argv[parser->argi++],
+        parser->program->data
+    );
+}
+
 static bool args_parser_parse_next(struct args_parser *parser) {
     if (parser->argi >= parser->argc) {
         return false;
     }
 
-    const char *arg = parser->argv[parser->argi];
-
     if (parser->stop_options) {
-        parser->argi++;
-        parser->program->parser(ARGS_KEY_ARG, arg, parser->program->data);
+        args_parser_parse_arg(parser);
         return true;
     }
+
+    const char *arg = parser->argv[parser->argi];
 
     if (!strcmp(arg, "--")) {
         parser->stop_options = true;
@@ -154,8 +161,7 @@ static bool args_parser_parse_next(struct args_parser *parser) {
         }
         args_parser_parse_shortopt(parser);
     } else {
-        parser->argi++;
-        parser->program->parser(ARGS_KEY_ARG, arg, parser->program->data);
+        args_parser_parse_arg(parser);
     }
 
     return true;
