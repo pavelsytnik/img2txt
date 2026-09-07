@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -24,6 +25,7 @@
 
 struct arguments {
     const char *img_filename;
+    const char *output_filename;
     double contrast;
     int width;
     bool use_weighted_grayscale;
@@ -34,6 +36,7 @@ struct arguments {
 
 static void arguments_init(struct arguments *args) {
     args->img_filename = NULL;
+    args->output_filename = NULL;
     args->contrast = 1.0;
     args->width = DEFAULT_OUT_WIDTH;
     args->use_weighted_grayscale = true;
@@ -60,6 +63,10 @@ static void parse_opt(int key, const char *arg, void *data) {
             double parsed_arg = atof(arg);
 
             args->contrast = parsed_arg;
+            break;
+        }
+        case 'o': {
+            args->output_filename = arg;
             break;
         }
         case 'b': {
@@ -115,6 +122,7 @@ int main(int argc, char **argv) {
         { 'c', "contrast", "DOUBLE" },
         { 'b', "no-box-filter", 0 },
         { 't', "terminal", 0 },
+        { 'o', "output", "STRING" },
         { KEY_NO_WEIGHTED_GRAYSCALE, "no-weighted-grayscale", 0 },
         { KEY_BLOCK_RAMP, "block-ramp", 0 },
         { 0 }
@@ -144,7 +152,12 @@ int main(int argc, char **argv) {
     );
 
     char txt_art_filename[256];
-    snprintf(txt_art_filename, sizeof(txt_art_filename), "%s.txt", args.img_filename);
+
+    if (args.output_filename) {
+        strncpy(txt_art_filename, args.output_filename, sizeof(txt_art_filename));
+    } else {
+        snprintf(txt_art_filename, sizeof(txt_art_filename), "%s.txt", args.img_filename);
+    }
 
     FILE *txt_art_file = img2txt_fopen(txt_art_filename, "w");
 
