@@ -107,6 +107,29 @@ static void parse_opt(int key, const char *arg, void *data) {
     }
 }
 
+static void build_output_filename(
+    char *buf,
+    size_t bufsz,
+    const char *out_filename,
+    const char *img_filename
+) {
+    int n;
+
+    if (out_filename) {
+        n = snprintf(buf, bufsz, "%s", out_filename);
+    } else if (img_filename) {
+        n = snprintf(buf, bufsz, "%s.txt", img_filename);
+    } else {
+        n = snprintf(buf, bufsz, "img2txt_generated.txt");
+    }
+
+    if (n == 0) {
+        error("Given path is empty");
+    } else if (n >= bufsz) {
+        error("Given path is too long");
+    }
+}
+
 int main(int argc, char **argv) {
 #ifdef ARGS_PLATFORM_WINDOWS
     args_windows_args_fetch(&argc, &argv);
@@ -153,11 +176,12 @@ int main(int argc, char **argv) {
 
     char txt_art_filename[256];
 
-    if (args.output_filename) {
-        strncpy(txt_art_filename, args.output_filename, sizeof(txt_art_filename));
-    } else {
-        snprintf(txt_art_filename, sizeof(txt_art_filename), "%s.txt", args.img_filename);
-    }
+    build_output_filename(
+        txt_art_filename,
+        sizeof(txt_art_filename),
+        args.output_filename,
+        args.img_filename
+    );
 
     FILE *txt_art_file = img2txt_fopen(txt_art_filename, "w");
 
