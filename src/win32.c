@@ -34,7 +34,7 @@ void win32_console_enable_utf8(void) {
     SetConsoleOutputCP(CP_UTF8);
 }
 
-void win32_args_fetch(int *out_argc, char ***out_argv) {
+char **win32_argv_fetch(void) {
     int argc;
     char **argv;
 
@@ -54,21 +54,14 @@ void win32_args_fetch(int *out_argc, char ***out_argv) {
 
     LocalFree(wargv);
 
-    *out_argc = argc;
-    *out_argv = argv;
+    return argv;
 }
 
-void win32_args_free(int *out_argc, char ***out_argv) {
-    int argc = *out_argc;
-    char **argv = *out_argv;
-
-    for (int i = 0; i < argc; i++) {
+void win32_argv_free(char **argv) {
+    for (int i = 0; argv[i]; i++) {
         free(argv[i]);
     }
     free(argv);
-
-    *out_argc = 0;
-    *out_argv = NULL;
 }
 
 #endif // _WIN32

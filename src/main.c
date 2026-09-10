@@ -137,7 +137,7 @@ static void build_output_filename(
 
 int main(int argc, char **argv) {
 #ifdef _WIN32
-    win32_args_fetch(&argc, &argv);
+    argv = win32_argv_fetch();
     win32_console_enable_utf8();
 #endif
 
@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
     image_destroy(&img);
 
 #ifdef _WIN32
-    win32_args_free(&argc, &argv);
+    win32_argv_free(argv);
 #endif
 
     return EXIT_SUCCESS;

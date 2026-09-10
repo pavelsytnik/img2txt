@@ -14,8 +14,8 @@ FILE *win32_fopen(const char *filename, const char *mode);
 
 void win32_console_enable_utf8(void);
 
-void win32_args_fetch(int *out_argc, char ***out_argv);
-void win32_args_free(int *out_argc, char ***out_argv);
+char **win32_argv_fetch(void);
+void win32_argv_free(char **argv);
 
 #endif // win32__h_
 
