@@ -24,6 +24,7 @@ add_executable(img2txt
     src/image_transform.c
     src/text_art.c
     src/util.c
+    src/win32.c
 )
 
 target_link_libraries(img2txt PRIVATE stb_image)

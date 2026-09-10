@@ -8,15 +8,15 @@
 #include "text_art.h"
 #include "util.h"
 
+#ifdef _WIN32
+  #include "win32.h"
+#endif
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef _WIN32
-  #include <windows.h>
-#endif
 
 #define KEY_NO_WEIGHTED_GRAYSCALE 256
 
@@ -136,9 +136,9 @@ static void build_output_filename(
 }
 
 int main(int argc, char **argv) {
-#ifdef ARGS_PLATFORM_WINDOWS
-    args_windows_args_fetch(&argc, &argv);
-    SetConsoleOutputCP(CP_UTF8);
+#ifdef _WIN32
+    win32_args_fetch(&argc, &argv);
+    win32_console_enable_utf8();
 #endif
 
     if (argc < 2) {
@@ -203,8 +203,8 @@ int main(int argc, char **argv) {
     text_art_destroy(&art);
     image_destroy(&img);
 
-#ifdef ARGS_PLATFORM_WINDOWS
-    args_windows_args_free(&argc, &argv);
+#ifdef _WIN32
+    win32_args_free(&argc, &argv);
 #endif
 
     return EXIT_SUCCESS;

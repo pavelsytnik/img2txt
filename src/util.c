@@ -6,8 +6,7 @@
 #include "util.h"
 
 #ifdef _WIN32
-#  include <windows.h>
-#  include <wchar.h>
+  #include "win32.h"
 #endif
 
 #include <stdarg.h>
@@ -35,35 +34,9 @@ noreturn void error(const char *fmt, ...) {
     exit(EXIT_FAILURE);
 }
 
-#ifdef _WIN32
-
-static wchar_t *utf8_to_wide(const char *str) {
-    int len = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
-
-    wchar_t *wstr = malloc(sizeof(wchar_t) * len);
-
-    MultiByteToWideChar(CP_UTF8, 0, str, -1, wstr, len);
-
-    return wstr;
-}
-
-static FILE *img2txt_windows_fopen(const char *filename, const char *mode) {
-    wchar_t *wfilename = utf8_to_wide(filename);
-    wchar_t *wmode = utf8_to_wide(mode);
-
-    FILE *file = _wfopen(wfilename, wmode);
-
-    free(wmode);
-    free(wfilename);
-
-    return file;
-}
-
-#endif // _WIN32
-
 FILE *img2txt_fopen(const char *filename, const char *mode) {
 #ifdef _WIN32
-    return img2txt_windows_fopen(filename, mode);
+    return win32_fopen(filename, mode);
 #else
     return fopen(filename, mode);
 #endif
