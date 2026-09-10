@@ -19,30 +19,29 @@
 #endif
 
 #define KEY_NO_WEIGHTED_GRAYSCALE 256
-#define KEY_BLOCK_RAMP 257
 
 #define DEFAULT_OUT_WIDTH 60
 
 struct arguments {
     const char *img_filename;
     const char *output_filename;
+    const char *ramp;
     double contrast;
     int width;
     bool use_weighted_grayscale;
     bool terminal_output;
     bool box_filter;
-    bool block_ramp;
 };
 
 static void arguments_init(struct arguments *args) {
     args->img_filename = NULL;
     args->output_filename = NULL;
+    args->ramp = TEXT_ART_ASCII_RAMP_STANDARD;
     args->contrast = 1.0;
     args->width = DEFAULT_OUT_WIDTH;
     args->use_weighted_grayscale = true;
     args->terminal_output = false;
     args->box_filter = true;
-    args->block_ramp = false;
 }
 
 static void parse_opt(int key, const char *arg, void *data) {
@@ -77,12 +76,18 @@ static void parse_opt(int key, const char *arg, void *data) {
             args->terminal_output = true;
             break;
         }
-        case KEY_NO_WEIGHTED_GRAYSCALE: {
-            args->use_weighted_grayscale = false;
+        case 'r': {
+            if (!strcmp(arg, "ascii")) {
+                args->ramp = TEXT_ART_ASCII_RAMP_STANDARD;
+            } else if (!strcmp(arg, "block")) {
+                args->ramp = TEXT_ART_BLOCK_RAMP;
+            } else {
+                error("Invalid --ramp value");
+            }
             break;
         }
-        case KEY_BLOCK_RAMP: {
-            args->block_ramp = true;
+        case KEY_NO_WEIGHTED_GRAYSCALE: {
+            args->use_weighted_grayscale = false;
             break;
         }
         case ARGS_KEY_ARG: {
@@ -146,8 +151,8 @@ int main(int argc, char **argv) {
         { 'b', "no-box-filter", 0 },
         { 't', "terminal", 0 },
         { 'o', "output", "STRING" },
+        { 'r', "ramp", "STRING" },
         { KEY_NO_WEIGHTED_GRAYSCALE, "no-weighted-grayscale", 0 },
-        { KEY_BLOCK_RAMP, "block-ramp", 0 },
         { 0 }
     };
 
@@ -164,9 +169,7 @@ int main(int argc, char **argv) {
         &art,
         &img,
         &(struct text_art_config) {
-            .ramp = (args.block_ramp)
-                ? TEXT_ART_BLOCK_RAMP
-                : TEXT_ART_ASCII_RAMP_STANDARD,
+            .ramp = args.ramp,
             .out_width = args.width,
             .contrast = args.contrast,
             .use_weighted_grayscale = args.use_weighted_grayscale,
