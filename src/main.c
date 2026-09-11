@@ -19,6 +19,7 @@
 #include <string.h>
 
 #define KEY_NO_WEIGHTED_GRAYSCALE 256
+#define KEY_NO_BOX_FILTER 257
 
 #define DEFAULT_OUT_WIDTH 60
 
@@ -68,10 +69,6 @@ static void parse_opt(int key, const char *arg, void *data) {
             args->output_filename = arg;
             break;
         }
-        case 'b': {
-            args->box_filter = false;
-            break;
-        }
         case 't': {
             args->terminal_output = true;
             break;
@@ -88,6 +85,10 @@ static void parse_opt(int key, const char *arg, void *data) {
         }
         case KEY_NO_WEIGHTED_GRAYSCALE: {
             args->use_weighted_grayscale = false;
+            break;
+        }
+        case KEY_NO_BOX_FILTER: {
+            args->box_filter = false;
             break;
         }
         case ARGS_KEY_ARG: {
@@ -148,11 +149,11 @@ int main(int argc, char **argv) {
     struct args_option options[] = {
         { 'w', "width", "INT" },
         { 'c', "contrast", "DOUBLE" },
-        { 'b', "no-box-filter", 0 },
         { 't', "terminal", 0 },
         { 'o', "output", "STRING" },
         { 'r', "ramp", "STRING" },
         { KEY_NO_WEIGHTED_GRAYSCALE, "no-weighted-grayscale", 0 },
+        { KEY_NO_BOX_FILTER, "no-box-filter", 0 },
         { 0 }
     };
 
