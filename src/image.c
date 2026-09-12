@@ -9,10 +9,14 @@
 
 #include <stb_image.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
 void image_load(struct image *out, const char *filename) {
+    assert(out != NULL);
+    assert(filename != NULL);
+
     out->data = stbi_load(filename, &out->width, &out->height, &out->channel_count, 0);
 
     if (!out->data) {
@@ -21,10 +25,17 @@ void image_load(struct image *out, const char *filename) {
 }
 
 void image_destroy(struct image *img) {
+    assert(img != NULL);
+
     stbi_image_free(img->data);
     memset(img, 0, sizeof(struct image));
 }
 
 uint8_t *image_pixel(const struct image *img, int x, int y) {
+    assert(img != NULL);
+    assert(img->data != NULL);
+    assert(x >= 0 && x < img->width);
+    assert(y >= 0 && y < img->height);
+
     return &img->data[(y * img->width + x) * img->channel_count];
 }

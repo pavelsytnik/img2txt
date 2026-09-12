@@ -7,6 +7,7 @@
 
 #include "util.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -163,6 +164,12 @@ static bool args_parser_parse_next(struct args_parser *parser) {
 }
 
 void args_parse(const struct args_program *program, int argc, char const *const *argv) {
+    assert(program != NULL);
+    assert(program->options != NULL);
+    assert(program->parser != NULL);
+    assert(argc > 0);
+    assert(argv != NULL);
+
     program->parser(ARGS_KEY_INIT, NULL, program->data);
 
     struct args_parser parser = { program, argv, argc, 1, 0, false };

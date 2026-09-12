@@ -9,6 +9,7 @@
   #include "win32.h"
 #endif
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +33,8 @@ noreturn void usage(void) {
 }
 
 noreturn void error(const char *fmt, ...) {
+    assert(fmt != NULL);
+
     va_list v_args;
     va_start(v_args, fmt);
 

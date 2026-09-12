@@ -8,6 +8,7 @@
 #include "image.h"
 #include "image_transform.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -177,6 +178,12 @@ void text_art_create(
     const struct image *img,
     const struct text_art_config *config
 ) {
+    assert(art != NULL);
+    assert(img != NULL);
+    assert(img->data != NULL);
+    assert(config != NULL);
+    assert(config->out_width > 0);
+
     struct text_art_context ctx;
 
     int out_width = config->out_width;
@@ -195,11 +202,17 @@ void text_art_create(
 }
 
 void text_art_destroy(struct text_art *art) {
+    assert(art != NULL);
+
     free(art->buffer);
     memset(art, 0, sizeof(struct text_art));
 }
 
 void text_art_write(const struct text_art *art, FILE *stream) {
+    assert(art != NULL);
+    assert(art->buffer != NULL);
+    assert(stream != NULL);
+
     const char *p = art->buffer;
 
     for (int y = 0; y < art->height; y++) {

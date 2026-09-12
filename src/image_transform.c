@@ -8,6 +8,7 @@
 #include "image.h"
 #include "util.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -100,6 +101,12 @@ void image_resized(
     int height,
     enum image_resize_filter filter
 ) {
+    assert(out != NULL);
+    assert(src != NULL);
+    assert(src->data != NULL);
+    assert(width > 0);
+    assert(height > 0);
+
     out->width = width;
     out->height = height;
     out->channel_count = src->channel_count;
