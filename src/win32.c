@@ -1,3 +1,8 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright (c) 2026 Pavlo Sytnyk.                                      *
+ * Licensed under the MIT License. See LICENSE for license information.  *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifdef _WIN32
 
 #include "win32.h"
