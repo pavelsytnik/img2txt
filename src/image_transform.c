@@ -15,6 +15,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef void (*resize_fn)(const struct image *src, struct image *dst);
+
+static bool init_image(struct image *img, int width, int height, int channels) {
+    uint8_t *data = malloc(width * height * channels);
+    if (!data) return false;
+
+    img->width = width;
+    img->height = height;
+    img->channel_count = channels;
+    img->data = data;
+
+    return true;
+}
+
 static void image_resize_nearest_neighbor(const struct image *src, struct image *dst) {
     for (int y = 0; y < dst->height; y++) {
         int y0 = y * src->height / dst->height;
@@ -95,6 +109,17 @@ static void image_resize_box(const struct image *src, struct image *dst) {
     }
 }
 
+static resize_fn get_resize_func(enum image_resize_filter filter) {
+    switch (filter) {
+    case IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR:
+        return image_resize_nearest_neighbor;
+    case IMAGE_RESIZE_FILTER_BOX:
+        return image_resize_box;
+    default:
+        return NULL;
+    }
+}
+
 bool image_resized(
     struct image *out,
     const struct image *src,
@@ -111,26 +136,12 @@ bool image_resized(
     assert(width > 0);
     assert(height > 0);
 
-    void (*resize)(const struct image *, struct image *) = NULL;
+    resize_fn resize = get_resize_func(filter);
+    if (!resize) return false;
 
-    switch (filter) {
-    case IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR:
-        resize = image_resize_nearest_neighbor;
-        break;
-    case IMAGE_RESIZE_FILTER_BOX:
-        resize = image_resize_box;
-        break;
-    default:
+    if (!init_image(out, width, height, src->channel_count)) {
         return false;
     }
-
-    uint8_t *data = malloc(width * height * src->channel_count);
-    if (!data) return false;
-
-    out->width = width;
-    out->height = height;
-    out->channel_count = src->channel_count;
-    out->data = data;
 
     (*resize)(src, out);
 
