@@ -10,6 +10,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -94,7 +95,7 @@ static void image_resize_box(const struct image *src, struct image *dst) {
     }
 }
 
-void image_resized(
+bool image_resized(
     struct image *out,
     const struct image *src,
     int width,
@@ -103,24 +104,35 @@ void image_resized(
 ) {
     assert(out != NULL);
     assert(src != NULL);
+    assert(src->width > 0);
+    assert(src->height > 0);
+    assert(src->channel_count >= 1 && src->channel_count <= 4);
     assert(src->data != NULL);
     assert(width > 0);
     assert(height > 0);
 
-    out->width = width;
-    out->height = height;
-    out->channel_count = src->channel_count;
-    out->data = malloc(width * height * out->channel_count);
+    void (*resize)(const struct image *, struct image *) = NULL;
 
     switch (filter) {
     case IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR:
-        image_resize_nearest_neighbor(src, out);
+        resize = image_resize_nearest_neighbor;
         break;
     case IMAGE_RESIZE_FILTER_BOX:
-        image_resize_box(src, out);
+        resize = image_resize_box;
         break;
     default:
-        error("Invalid image resize filter value");
-        break;
+        return false;
     }
+
+    uint8_t *data = malloc(width * height * src->channel_count);
+    if (!data) return false;
+
+    out->width = width;
+    out->height = height;
+    out->channel_count = src->channel_count;
+    out->data = data;
+
+    (*resize)(src, out);
+
+    return true;
 }

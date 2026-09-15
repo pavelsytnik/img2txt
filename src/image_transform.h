@@ -6,6 +6,8 @@
 #ifndef image_transform__h_
 #define image_transform__h_
 
+#include <stdbool.h>
+
 enum image_resize_filter {
     IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR,
     IMAGE_RESIZE_FILTER_BOX
@@ -13,7 +15,7 @@ enum image_resize_filter {
 
 struct image;
 
-void image_resized(
+bool image_resized(
     struct image *out,
     const struct image *src,
     int width,
