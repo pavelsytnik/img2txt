@@ -28,11 +28,11 @@ struct text_art_config {
     bool box_filter;
 };
 
-void text_art_create(struct text_art *art,
+bool text_art_create(struct text_art *art,
     const struct image *img,
     const struct text_art_config *config
 );
 void text_art_destroy(struct text_art *art);
-void text_art_write(const struct text_art *art, FILE *stream);
+bool text_art_write(const struct text_art *art, FILE *stream);
 
 #endif // text_art__h_

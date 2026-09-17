@@ -5,23 +5,28 @@
 
 #include "image.h"
 
-#include "util.h"
-
 #include <stb_image.h>
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
-void image_load(struct image *out, const char *filename) {
+bool image_load(struct image *out, const char *filename) {
     assert(out != NULL);
     assert(filename != NULL);
 
-    out->data = stbi_load(filename, &out->width, &out->height, &out->channel_count, 0);
+    int width, height, channels;
 
-    if (!out->data) {
-        error("File '%s' does not exist", filename);
-    }
+    stbi_uc *data = stbi_load(filename, &width, &height, &channels, 0);
+    if (!data) return false;
+
+    out->width = width;
+    out->height = height;
+    out->channel_count = channels;
+    out->data = data;
+
+    return true;
 }
 
 void image_destroy(struct image *img) {

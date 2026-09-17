@@ -71,31 +71,36 @@ static size_t utf8_longest_char_length(const char *s) {
     return max;
 }
 
-static void text_art_context_init(
+static bool text_art_context_init(
     struct text_art_context *ctx,
     const struct text_art_config *config
 ) {
-    const char *ramp = (config->ramp)
+    const char *raw_ramp = (config->ramp)
         ? config->ramp
         : TEXT_ART_ASCII_RAMP_STANDARD;
 
-    ctx->ramp_len = utf8_length(ramp);
+    size_t ramp_len = utf8_length(raw_ramp);
 
-    ctx->ramp = malloc(ctx->ramp_len * sizeof(struct utf8_char_view));
+    struct utf8_char_view *ramp = malloc(ramp_len * sizeof(*ramp));
+    if (!ramp) return false;
 
-    const char *ramp_char = ramp;
-    for (size_t i = 0; i < ctx->ramp_len; i++) {
-        ctx->ramp[i].data = ramp_char;
-        ctx->ramp[i].size = utf8_char_length(ramp_char);
+    const char *ramp_char = raw_ramp;
+    for (size_t i = 0; i < ramp_len; i++) {
+        ramp[i].data = ramp_char;
+        ramp[i].size = utf8_char_length(ramp_char);
 
-        ramp_char += ctx->ramp[i].size;
+        ramp_char += ramp[i].size;
     }
 
+    ctx->ramp = ramp;
+    ctx->ramp_len = ramp_len;
     ctx->contrast = config->contrast;
     ctx->use_weighted_grayscale = config->use_weighted_grayscale;
     ctx->filter = (config->box_filter)
         ? IMAGE_RESIZE_FILTER_BOX
         : IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR;
+
+    return true;
 }
 
 static void text_art_context_destroy(struct text_art_context *ctx) {
@@ -134,14 +139,19 @@ static const struct utf8_char_view *pixel_to_glyph(
     return &ctx->ramp[px_light * ctx->ramp_len / 256];
 }
 
-static void text_art_init(struct text_art *art, int width, int height, size_t max_glyph_bytes) {
-    art->width = width;
-    art->height = height;
-
+static bool text_art_init(struct text_art *art, int width, int height, size_t max_glyph_bytes) {
     size_t buffer_size = (size_t)width * height * max_glyph_bytes + 1;
 
-    art->buffer = malloc(buffer_size);
-    art->buffer[buffer_size - 1] = '\0';
+    char *buffer = malloc(buffer_size);
+    if (!buffer) return false;
+
+    buffer[buffer_size - 1] = '\0';
+
+    art->width = width;
+    art->height = height;
+    art->buffer = buffer;
+
+    return true;
 }
 
 static void sample_image(
@@ -160,26 +170,33 @@ static void sample_image(
     }
 }
 
-static void text_art_populate(
+static bool text_art_populate(
     struct text_art *art,
     const struct image *img,
     const struct text_art_context *ctx
 ) {
     struct image resized_img;
-    image_resized(&resized_img, img, art->width, art->height, ctx->filter);
+    if (!image_resized(&resized_img, img, art->width, art->height, ctx->filter)) {
+        return false;
+    }
 
     sample_image(&resized_img, art->buffer, ctx);
 
     image_destroy(&resized_img);
+
+    return true;
 }
 
-void text_art_create(
+bool text_art_create(
     struct text_art *art,
     const struct image *img,
     const struct text_art_config *config
 ) {
     assert(art != NULL);
     assert(img != NULL);
+    assert(img->width > 0);
+    assert(img->height > 0);
+    assert(img->channel_count >= 1 && img->channel_count <= 4);
     assert(img->data != NULL);
     assert(config != NULL);
     assert(config->out_width > 0);
@@ -192,13 +209,23 @@ void text_art_create(
     size_t longest_glyph_size = utf8_longest_char_length(
         (config->ramp) ? config->ramp : TEXT_ART_ASCII_RAMP_STANDARD
     );
+    assert(longest_glyph_size != 0);
 
-    text_art_init(art, out_width, out_height, longest_glyph_size);
-    text_art_context_init(&ctx, config);
+    bool ok;
 
-    text_art_populate(art, img, &ctx);
+    ok = text_art_init(art, out_width, out_height, longest_glyph_size);
+    if (!ok) goto end;
+
+    ok = text_art_context_init(&ctx, config);
+    if (!ok) goto cleanup_art;
+
+    ok = text_art_populate(art, img, &ctx);
 
     text_art_context_destroy(&ctx);
+cleanup_art:
+    if (!ok) text_art_destroy(art);
+end:
+    return ok;
 }
 
 void text_art_destroy(struct text_art *art) {
@@ -208,7 +235,7 @@ void text_art_destroy(struct text_art *art) {
     memset(art, 0, sizeof(struct text_art));
 }
 
-void text_art_write(const struct text_art *art, FILE *stream) {
+bool text_art_write(const struct text_art *art, FILE *stream) {
     assert(art != NULL);
     assert(art->buffer != NULL);
     assert(stream != NULL);
@@ -218,9 +245,18 @@ void text_art_write(const struct text_art *art, FILE *stream) {
     for (int y = 0; y < art->height; y++) {
         for (int x = 0; x < art->width; x++) {
             size_t n = utf8_char_length(p);
-            fwrite(p, 1, n, stream);
+
+            if (fwrite(p, 1, n, stream) != n) {
+                return false;
+            }
+
             p += n;
         }
-        putc('\n', stream);
+
+        if (putc('\n', stream) == EOF) {
+            return false;
+        }
     }
+
+    return true;
 }

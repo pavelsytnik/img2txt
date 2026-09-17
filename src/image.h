@@ -6,6 +6,7 @@
 #ifndef image__h_
 #define image__h_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 struct image {
@@ -15,7 +16,7 @@ struct image {
     uint8_t *data;
 };
 
-void image_load(struct image *out, const char *filename);
+bool image_load(struct image *out, const char *filename);
 void image_destroy(struct image *img);
 
 uint8_t *image_pixel(const struct image *img, int x, int y);
