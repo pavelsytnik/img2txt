@@ -6,7 +6,6 @@
 #include "image_transform.h"
 
 #include "image.h"
-#include "util.h"
 
 #include <assert.h>
 #include <math.h>
