@@ -160,13 +160,18 @@ int main(int argc, char **argv) {
     struct arguments args;
 
     struct args_program program = { options, parse_opt, &args };
-    args_parse(&program, argc, argv);
+    args_parse(&program, argc, argv); // This function aborts execution on error
 
     struct image img;
-    image_load(&img, args.img_filename);
-
     struct text_art art;
-    text_art_create(
+    char txt_art_filename[256];
+    FILE *txt_art_file;
+
+    if (!image_load(&img, args.img_filename)) {
+        error("Image '%s' loading failed", args.img_filename);
+    }
+
+    if (!text_art_create(
         &art,
         &img,
         &(struct text_art_config) {
@@ -176,9 +181,9 @@ int main(int argc, char **argv) {
             .use_weighted_grayscale = args.use_weighted_grayscale,
             .box_filter = args.box_filter
         }
-    );
-
-    char txt_art_filename[256];
+    )) {
+        error("Text art creation failed");
+    }
 
     build_output_filename(
         txt_art_filename,
@@ -187,17 +192,19 @@ int main(int argc, char **argv) {
         args.img_filename
     );
 
-    FILE *txt_art_file = img2txt_fopen(txt_art_filename, "w");
-
+    txt_art_file = img2txt_fopen(txt_art_filename, "w");
     if (!txt_art_file) {
-        image_destroy(&img);
-        error("Failed to create file '%s'", txt_art_filename);
+        error("File '%s' creation failed", txt_art_filename);
     }
 
-    text_art_write(&art, txt_art_file);
+    if (!text_art_write(&art, txt_art_file)) {
+        error("Text art output to '%s' failed", txt_art_filename);
+    }
 
     if (args.terminal_output) {
-        text_art_write(&art, stdout);
+        if (!text_art_write(&art, stdout)) {
+            error("Text art output to stdout failed");
+        }
     }
 
     fclose(txt_art_file);
