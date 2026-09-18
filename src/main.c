@@ -112,7 +112,7 @@ static void parse_opt(int key, const char *arg, void *data) {
     }
 }
 
-static void build_output_filename(
+static int build_output_filename(
     char *buf,
     size_t bufsz,
     const char *out_filename,
@@ -128,11 +128,7 @@ static void build_output_filename(
         n = snprintf(buf, bufsz, "img2txt_generated.txt");
     }
 
-    if (n == 0) {
-        error("Given path is empty");
-    } else if (n >= bufsz) {
-        error("Given path is too long");
-    }
+    return n;
 }
 
 int main(int argc, char **argv) {
@@ -189,7 +185,7 @@ int main(int argc, char **argv) {
         sizeof(txt_art_filename),
         args.output_filename,
         args.img_filename
-    );
+    ); // Its return value is ignored
 
     txt_art_file = img2txt_fopen(txt_art_filename, "w");
     if (!txt_art_file) {
