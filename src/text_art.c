@@ -16,14 +16,30 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct text_art_renderer;
 struct utf8_char_view;
 
 struct text_art_context {
+    const struct text_art_renderer *renderer;
     struct utf8_char_view *ramp;
     size_t ramp_len;
     double contrast;
     bool use_weighted_grayscale;
     enum image_resize_filter filter;
+};
+
+struct text_art_renderer {
+    void (*image_size)(
+        int art_width,
+        int art_height,
+        int *img_width,
+        int *img_height
+    );
+    void (*render)(
+        const struct image *img,
+        char *buffer,
+        const struct text_art_context *ctx
+    );
 };
 
 struct utf8_char_view {
@@ -70,10 +86,31 @@ static size_t utf8_longest_char_length(const char *s) {
     return max;
 }
 
+static void image_size_ramp(
+    int art_width,
+    int art_height,
+    int *img_width,
+    int *img_height
+) {
+    *img_width = art_width;
+    *img_height = art_height;
+}
+
+static void render_ramp(
+    const struct image *img,
+    char *buffer,
+    const struct text_art_context *ctx
+);
+
 static bool text_art_context_init(
     struct text_art_context *ctx,
     const struct text_art_config *config
 ) {
+    static const struct text_art_renderer ramp_renderer = {
+        .image_size = image_size_ramp,
+        .render = render_ramp
+    };
+
     const char *raw_ramp = (config->ramp)
         ? config->ramp
         : TEXT_ART_ASCII_RAMP_STANDARD;
@@ -91,6 +128,7 @@ static bool text_art_context_init(
         ramp_char += ramp[i].size;
     }
 
+    ctx->renderer = &ramp_renderer; // There's only one renderer for now
     ctx->ramp = ramp;
     ctx->ramp_len = ramp_len;
     ctx->contrast = config->contrast;
@@ -153,7 +191,7 @@ static bool text_art_init(struct text_art *art, int width, int height, size_t ma
     return true;
 }
 
-static void sample_image(
+static void render_ramp(
     const struct image *img,
     char *buffer,
     const struct text_art_context *ctx
@@ -175,11 +213,15 @@ static bool text_art_populate(
     const struct text_art_context *ctx
 ) {
     struct image resized_img;
-    if (!image_resized(&resized_img, img, art->width, art->height, ctx->filter)) {
+    int width, height;
+
+    ctx->renderer->image_size(art->width, art->height, &width, &height);
+
+    if (!image_resized(&resized_img, img, width, height, ctx->filter)) {
         return false;
     }
 
-    sample_image(&resized_img, art->buffer, ctx);
+    ctx->renderer->render(&resized_img, art->buffer, ctx);
 
     image_destroy(&resized_img);
 
