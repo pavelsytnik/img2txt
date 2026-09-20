@@ -7,6 +7,7 @@
 
 #include "image.h"
 #include "image_transform.h"
+#include "util.h"
 
 #include <assert.h>
 #include <math.h>
@@ -300,4 +301,17 @@ bool text_art_write(const struct text_art *art, FILE *stream) {
     }
 
     return true;
+}
+
+bool text_art_save(const struct text_art *art, const char *filename) {
+    FILE *file = img2txt_fopen(filename, "w");
+    if (!file) return false;
+
+    bool ok = text_art_write(art, file);
+
+    if (fclose(file) != 0) {
+        ok = false;
+    }
+
+    return ok;
 }

@@ -160,7 +160,6 @@ int main(int argc, char **argv) {
     struct image img;
     struct text_art art;
     char txt_art_filename[256];
-    FILE *txt_art_file;
 
     if (!image_load(&img, args.img_filename)) {
         error("Image '%s' loading failed", args.img_filename);
@@ -187,13 +186,8 @@ int main(int argc, char **argv) {
         args.img_filename
     ); // Its return value is ignored
 
-    txt_art_file = img2txt_fopen(txt_art_filename, "w");
-    if (!txt_art_file) {
-        error("File '%s' creation failed", txt_art_filename);
-    }
-
-    if (!text_art_write(&art, txt_art_file)) {
-        error("Text art output to '%s' failed", txt_art_filename);
+    if (!text_art_save(&art, txt_art_filename)) {
+        error("Saving text art to '%s' failed", txt_art_filename);
     }
 
     if (args.terminal_output) {
@@ -202,7 +196,6 @@ int main(int argc, char **argv) {
         }
     }
 
-    fclose(txt_art_file);
     text_art_destroy(&art);
     image_destroy(&img);
 

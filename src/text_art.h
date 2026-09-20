@@ -34,5 +34,6 @@ bool text_art_create(struct text_art *art,
 );
 void text_art_destroy(struct text_art *art);
 bool text_art_write(const struct text_art *art, FILE *stream);
+bool text_art_save(const struct text_art *art, const char *filename);
 
 #endif // text_art__h_
