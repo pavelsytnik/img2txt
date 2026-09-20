@@ -112,23 +112,35 @@ static void parse_opt(int key, const char *arg, void *data) {
     }
 }
 
-static int build_output_filename(
-    char *buf,
-    size_t bufsz,
+static char *build_output_filename(
     const char *out_filename,
     const char *img_filename
 ) {
-    int n;
+    const char *format;
+    const char *filename;
 
     if (out_filename) {
-        n = snprintf(buf, bufsz, "%s", out_filename);
+        format = "%s";
+        filename = out_filename;
     } else if (img_filename) {
-        n = snprintf(buf, bufsz, "%s.txt", img_filename);
+        format = "%s.txt";
+        filename = img_filename;
     } else {
-        n = snprintf(buf, bufsz, "img2txt_generated.txt");
+        return NULL;
     }
 
-    return n;
+    int n = snprintf(NULL, 0, format, filename);
+    if (n < 0) return NULL;
+
+    char *buf = malloc((size_t)n + 1);
+    if (!buf) return NULL;
+
+    if (snprintf(buf, (size_t)n + 1, format, filename) < 0) {
+        free(buf);
+        return NULL;
+    }
+
+    return buf;
 }
 
 int main(int argc, char **argv) {
@@ -159,7 +171,7 @@ int main(int argc, char **argv) {
 
     struct image img;
     struct text_art art;
-    char txt_art_filename[256];
+    char *txt_art_filename;
 
     if (!image_load(&img, args.img_filename)) {
         error("Image '%s' loading failed", args.img_filename);
@@ -179,12 +191,13 @@ int main(int argc, char **argv) {
         error("Text art creation failed");
     }
 
-    build_output_filename(
-        txt_art_filename,
-        sizeof(txt_art_filename),
+    txt_art_filename = build_output_filename(
         args.output_filename,
         args.img_filename
-    ); // Its return value is ignored
+    );
+    if (!txt_art_filename) {
+        error("Output filename building failed");
+    }
 
     if (!text_art_save(&art, txt_art_filename)) {
         error("Saving text art to '%s' failed", txt_art_filename);
@@ -196,6 +209,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    free(txt_art_filename);
     text_art_destroy(&art);
     image_destroy(&img);
 
