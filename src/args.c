@@ -14,6 +14,7 @@
 
 struct args_parser {
     const struct args_program *program;
+    struct args_state *state;
     const char *const *argv;
     int argc;
     int argi;
@@ -87,7 +88,7 @@ static void args_parser_parse_longopt(struct args_parser *parser) {
 
     parser->argi++;
 
-    parser->program->parser(opt->key, optarg, parser->program->data);
+    parser->program->parser(opt->key, optarg, parser->state);
 }
 
 static void args_parser_parse_shortopt(struct args_parser *parser) {
@@ -122,15 +123,17 @@ static void args_parser_parse_shortopt(struct args_parser *parser) {
         parser->subopt++;
     }
 
-    parser->program->parser(opt->key, optarg, parser->program->data);
+    parser->program->parser(opt->key, optarg, parser->state);
 }
 
 static void args_parser_parse_arg(struct args_parser *parser) {
     parser->program->parser(
         ARGS_KEY_ARG,
         parser->argv[parser->argi++],
-        parser->program->data
+        parser->state
     );
+
+    parser->state->arg_num++;
 }
 
 static bool args_parser_parse_next(struct args_parser *parser) {
@@ -169,12 +172,14 @@ void args_parse(const struct args_program *program, int argc, char const *const 
     assert(argc > 0);
     assert(argv != NULL);
 
-    program->parser(ARGS_KEY_INIT, NULL, program->data);
+    struct args_state state = { 0, program->data };
 
-    struct args_parser parser = { program, argv, argc, 1, 0, false };
+    program->parser(ARGS_KEY_INIT, NULL, &state);
+
+    struct args_parser parser = { program, &state, argv, argc, 1, 0, false };
 
     while (args_parser_parse_next(&parser))
         ;
 
-    program->parser(ARGS_KEY_END, NULL, program->data);
+    program->parser(ARGS_KEY_END, NULL, &state);
 }

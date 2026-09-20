@@ -44,8 +44,8 @@ static void arguments_init(struct arguments *args) {
     args->box_filter = true;
 }
 
-static void parse_opt(int key, const char *arg, void *data) {
-    struct arguments *args = data;
+static void parse_opt(int key, const char *arg, struct args_state *state) {
+    struct arguments *args = state->data;
 
     switch (key) {
         case 'w': {
@@ -91,12 +91,11 @@ static void parse_opt(int key, const char *arg, void *data) {
             break;
         }
         case ARGS_KEY_ARG: {
-            if (!args->img_filename) {
+            if (state->arg_num == 0) {
                 args->img_filename = arg;
-                break;
+            } else {
+                error("Too many arguments provided");
             }
-
-            error("Too many arguments provided");
             break;
         }
         case ARGS_KEY_INIT: {
@@ -104,8 +103,8 @@ static void parse_opt(int key, const char *arg, void *data) {
             break;
         }
         case ARGS_KEY_END: {
-            if (!args->img_filename) {
-                error("Missing <FILENAME> argument");
+            if (state->arg_num < 1) {
+                error("<IMG_FILENAME> argument is missing");
             }
             break;
         }

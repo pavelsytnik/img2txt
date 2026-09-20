@@ -12,8 +12,9 @@
 
 struct args_option;
 struct args_program;
+struct args_state;
 
-typedef void (*args_parser)(int key, const char *arg, void *data);
+typedef void (*args_parser)(int key, const char *arg, struct args_state *state);
 
 struct args_option {
     int key;
@@ -24,6 +25,11 @@ struct args_option {
 struct args_program {
     const struct args_option *options;
     args_parser parser;
+    void *data;
+};
+
+struct args_state {
+    int arg_num;
     void *data;
 };
 
