@@ -20,8 +20,6 @@
 #define KEY_NO_WEIGHTED_GRAYSCALE 256
 #define KEY_NO_BOX_FILTER 257
 
-#define DEFAULT_OUT_WIDTH 60
-
 struct arguments {
     const char *img_filename;
     const char *output_filename;
@@ -38,7 +36,7 @@ static void arguments_init(struct arguments *args) {
     args->output_filename = NULL;
     args->ramp = TEXT_ART_ASCII_RAMP_STANDARD;
     args->contrast = 1.0;
-    args->width = DEFAULT_OUT_WIDTH;
+    args->width = 60;
     args->use_weighted_grayscale = true;
     args->terminal_output = false;
     args->box_filter = true;
