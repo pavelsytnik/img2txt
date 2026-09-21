@@ -42,7 +42,7 @@ static void arguments_init(struct arguments *args) {
     args->box_filter = true;
 }
 
-static void parse_opt(int key, const char *arg, struct args_state *state) {
+static bool parse_opt(int key, const char *arg, struct args_state *state) {
     struct arguments *args = state->data;
 
     switch (key) {
@@ -50,7 +50,8 @@ static void parse_opt(int key, const char *arg, struct args_state *state) {
             int parsed_arg = atoi(arg);
 
             if (parsed_arg <= 0) {
-                error("Width value must be a positive integer");
+                fprintf(stderr, "Width value must be a positive integer\n");
+                return false;
             }
 
             args->width = parsed_arg;
@@ -76,7 +77,8 @@ static void parse_opt(int key, const char *arg, struct args_state *state) {
             } else if (!strcmp(arg, "block")) {
                 args->ramp = TEXT_ART_BLOCK_RAMP;
             } else {
-                error("Invalid --ramp value");
+                fprintf(stderr, "Invalid --ramp value\n");
+                return false;
             }
             break;
         }
@@ -92,7 +94,8 @@ static void parse_opt(int key, const char *arg, struct args_state *state) {
             if (state->arg_num == 0) {
                 args->img_filename = arg;
             } else {
-                error("Too many arguments provided");
+                fprintf(stderr, "Too many arguments provided\n");
+                return false;
             }
             break;
         }
@@ -102,11 +105,14 @@ static void parse_opt(int key, const char *arg, struct args_state *state) {
         }
         case ARGS_KEY_END: {
             if (state->arg_num < 1) {
-                error("<IMG_FILENAME> argument is missing");
+                fprintf(stderr, "<IMG_FILENAME> argument is missing\n");
+                return false;
             }
             break;
         }
     }
+
+    return true;
 }
 
 static char *build_output_filename(
@@ -164,7 +170,9 @@ int main(int argc, char **argv) {
     struct arguments args;
 
     struct args_program program = { options, parse_opt, &args };
-    args_parse(&program, argc, argv); // This function aborts execution on error
+    if (!args_parse(&program, argc, argv)) {
+        return EXIT_FAILURE;
+    }
 
     struct image img;
     struct text_art art;
