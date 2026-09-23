@@ -10,7 +10,20 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+
+bool image_init(struct image *img, int width, int height, int channels) {
+    uint8_t *data = malloc(width * height * channels);
+    if (!data) return false;
+
+    img->width = width;
+    img->height = height;
+    img->channel_count = channels;
+    img->data = data;
+
+    return true;
+}
 
 bool image_load(struct image *out, const char *filename) {
     assert(out != NULL);

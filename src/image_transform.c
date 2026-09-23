@@ -10,23 +10,11 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 
 typedef void (*resize_fn)(const struct image *src, struct image *dst);
-
-static bool init_image(struct image *img, int width, int height, int channels) {
-    uint8_t *data = malloc(width * height * channels);
-    if (!data) return false;
-
-    img->width = width;
-    img->height = height;
-    img->channel_count = channels;
-    img->data = data;
-
-    return true;
-}
 
 static void image_resize_nearest_neighbor(const struct image *src, struct image *dst) {
     for (int y = 0; y < dst->height; y++) {
@@ -138,7 +126,7 @@ bool image_resized(
     resize_fn resize = get_resize_func(filter);
     if (!resize) return false;
 
-    if (!init_image(out, width, height, src->channel_count)) {
+    if (!image_init(out, width, height, src->channel_count)) {
         return false;
     }
 
