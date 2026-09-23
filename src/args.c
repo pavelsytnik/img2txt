@@ -72,15 +72,15 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
                     opt = &opts[i];
                 } else {
                     if (!ambig) {
-                        ambig_set = calloc(option_count, sizeof(*ambig_set));
-                        if (ambig_set) {
-                            ambig_set[opt - opts] = true;
-                        }
                         ambig = true;
+
+                        ambig_set = calloc(option_count, sizeof(*ambig_set));
+                        if (!ambig_set) break;
+
+                        ambig_set[opt - opts] = true;
                     }
-                    if (ambig_set) {
-                        ambig_set[i] = true;
-                    }
+
+                    ambig_set[i] = true;
                 }
             }
         }
