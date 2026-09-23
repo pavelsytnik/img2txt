@@ -31,19 +31,6 @@ static bool longopts_match(const char *opt, const char *name) {
     return *name == '\0' && (*opt == '\0' || *opt == '=');
 }
 
-static const struct args_option *args_option_find_by_name(
-    const struct args_option *opts,
-    const char *name
-) {
-    for (int i = 0; opts[i].key; i++) {
-        if (longopts_match(name, opts[i].name)) {
-            return &opts[i];
-        }
-    }
-
-    return NULL;
-}
-
 static const struct args_option *args_option_find_by_key(
     const struct args_option *opts,
     int key
@@ -63,14 +50,60 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
 
     size_t name_len = (eq) ? (size_t)(eq - name) : strlen(name);
 
-    const struct args_option *opt = args_option_find_by_name(
-        parser->program->options,
-        name
-    );
+    const struct args_option *opts = parser->program->options;
+    const struct args_option *opt = NULL;
+    int option_count = 0;
+
+    for (int i = 0; opts[i].key; i++) {
+        if (longopts_match(name, opts[i].name)) {
+            opt = &opts[i];
+            break;
+        }
+        option_count++;
+    }
 
     if (!opt) {
-        fprintf(stderr, "Unrecognized option '%.*s'\n", (int)name_len, name);
-        return false;
+        bool *ambig_set = NULL;
+        bool ambig = false;
+
+        for (int i = 0; opts[i].key; i++) {
+            if (!strncmp(opts[i].name, name, name_len)) {
+                if (!opt) {
+                    opt = &opts[i];
+                } else {
+                    if (!ambig) {
+                        ambig_set = calloc(option_count, sizeof(*ambig_set));
+                        if (ambig_set) {
+                            ambig_set[opt - opts] = true;
+                        }
+                        ambig = true;
+                    }
+                    if (ambig_set) {
+                        ambig_set[i] = true;
+                    }
+                }
+            }
+        }
+
+        if (!opt) {
+            fprintf(stderr, "Unrecognized option '%.*s'\n", (int)name_len, name);
+            return false;
+        }
+
+        if (ambig) {
+            fprintf(stderr, "Ambiguous option '%.*s'", (int)name_len, name);
+            if (ambig_set) {
+                fprintf(stderr, "; Possibilities:");
+                for (int i = 0; opts[i].key; i++) {
+                    if (ambig_set[i]) {
+                        fprintf(stderr, " '%s'", opts[i].name);
+                    }
+                }
+                free(ambig_set);
+            }
+            fprintf(stderr, "\n");
+            return false;
+        }
     }
 
     const char *optarg = NULL;
@@ -82,7 +115,7 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
             parser->argi++;
             optarg = parser->argv[parser->argi];
         } else {
-            fprintf(stderr, "Option '%.*s' requires an argument\n", (int)name_len, name);
+            fprintf(stderr, "Option '%s' requires an argument\n", opt->name);
             return false;
         }
     }
