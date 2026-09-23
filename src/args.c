@@ -11,6 +11,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+  #define flockfile _lock_file
+  #define funlockfile _unlock_file
+#endif
+
 struct args_parser {
     const struct args_program *program;
     struct args_state *state;
@@ -91,6 +96,7 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
         }
 
         if (ambig) {
+            flockfile(stderr);
             fprintf(stderr, "Ambiguous option '%.*s'", (int)name_len, name);
             if (ambig_set) {
                 fprintf(stderr, "; Possibilities:");
@@ -102,6 +108,7 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
                 free(ambig_set);
             }
             fprintf(stderr, "\n");
+            funlockfile(stderr);
             return false;
         }
     }
