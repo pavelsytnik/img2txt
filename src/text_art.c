@@ -7,6 +7,7 @@
 
 #include "image.h"
 #include "image_transform.h"
+#include "utf8.h"
 #include "util.h"
 
 #include <assert.h>
@@ -18,7 +19,6 @@
 #include <string.h>
 
 struct text_art_renderer;
-struct utf8_char_view;
 
 struct text_art_context {
     const struct text_art_renderer *renderer;
@@ -42,33 +42,6 @@ struct text_art_renderer {
         const struct text_art_context *ctx
     );
 };
-
-struct utf8_char_view {
-    const char *data;
-    size_t size;
-};
-
-static size_t utf8_length(const char *s) {
-    size_t n = 0;
-
-    while (*s) {
-        if ((*s & 0xC0) != 0x80) n++;
-        s++;
-    }
-
-    return n;
-}
-
-static size_t utf8_char_length(const char *s) {
-    uint8_t c = (uint8_t)*s;
-
-    if ((c & 0x80) == 0x00) return 1;
-    if ((c & 0xE0) == 0xC0) return 2;
-    if ((c & 0xF0) == 0xE0) return 3;
-    if ((c & 0xF8) == 0xF0) return 4;
-
-    return 0;
-}
 
 static size_t utf8_longest_char_length(const char *s) {
     size_t max = 0;

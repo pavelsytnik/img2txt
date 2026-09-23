@@ -23,6 +23,7 @@ add_executable(img2txt
     src/image.c
     src/image_transform.c
     src/text_art.c
+    src/utf8.c
     src/util.c
 )
 
