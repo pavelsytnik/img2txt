@@ -16,4 +16,6 @@ struct utf8_char_view {
 size_t utf8_length(const char *s);
 size_t utf8_char_length(const char *s);
 
+struct utf8_char_view *utf8_char_views(const char *s);
+
 #endif // utf8__h_

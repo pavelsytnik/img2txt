@@ -91,16 +91,8 @@ static bool text_art_context_init(
 
     size_t ramp_len = utf8_length(raw_ramp);
 
-    struct utf8_char_view *ramp = malloc(ramp_len * sizeof(*ramp));
+    struct utf8_char_view *ramp = utf8_char_views(raw_ramp);
     if (!ramp) return false;
-
-    const char *ramp_char = raw_ramp;
-    for (size_t i = 0; i < ramp_len; i++) {
-        ramp[i].data = ramp_char;
-        ramp[i].size = utf8_char_length(ramp_char);
-
-        ramp_char += ramp[i].size;
-    }
 
     ctx->renderer = &ramp_renderer; // There's only one renderer for now
     ctx->ramp = ramp;

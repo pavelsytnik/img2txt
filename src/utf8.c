@@ -5,8 +5,8 @@
 
 #include "utf8.h"
 
-#include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 size_t utf8_length(const char *s) {
     size_t n = 0;
@@ -28,4 +28,21 @@ size_t utf8_char_length(const char *s) {
     if ((c & 0xF8) == 0xF0) return 4;
 
     return 0;
+}
+
+struct utf8_char_view *utf8_char_views(const char *s) {
+    size_t n = utf8_length(s);
+
+    struct utf8_char_view *views = malloc(n * sizeof(*views));
+    if (!views) return NULL;
+
+    const char *c = s;
+    for (size_t i = 0; i < n; i++) {
+        views[i].data = c;
+        views[i].size = utf8_char_length(c);
+
+        c += views[i].size;
+    }
+
+    return views;
 }
