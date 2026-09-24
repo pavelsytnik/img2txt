@@ -37,8 +37,8 @@ struct text_art_renderer {
         int *img_height
     );
     void (*render)(
-        const struct image *img,
         char *buffer,
+        const struct image *img,
         const struct text_art_context *ctx
     );
 };
@@ -71,8 +71,8 @@ static void image_size_ramp(
 }
 
 static void render_ramp(
-    const struct image *img,
     char *buffer,
+    const struct image *img,
     const struct text_art_context *ctx
 );
 
@@ -158,8 +158,8 @@ static bool text_art_init(struct text_art *art, int width, int height, size_t ma
 }
 
 static void render_ramp(
-    const struct image *img,
     char *buffer,
+    const struct image *img,
     const struct text_art_context *ctx
 ) {
     for (int y = 0; y < img->height; y++) {
@@ -187,7 +187,7 @@ static bool text_art_populate(
         return false;
     }
 
-    ctx->renderer->render(&resized_img, art->buffer, ctx);
+    ctx->renderer->render(art->buffer, &resized_img, ctx);
 
     image_destroy(&resized_img);
 
