@@ -76,25 +76,38 @@ static void render_ramp(
     const struct text_art_context *ctx
 );
 
-static bool text_art_context_init(
-    struct text_art_context *ctx,
-    const struct text_art_config *config
-) {
+static const struct text_art_renderer *get_renderer(enum text_art_mode mode) {
     static const struct text_art_renderer ramp_renderer = {
         .image_size = image_size_ramp,
         .render = render_ramp
     };
 
+    switch (mode) {
+    case TEXT_ART_MODE_RAMP:
+        return &ramp_renderer;
+    default:
+        return NULL;
+    }
+}
+
+static bool text_art_context_init(
+    struct text_art_context *ctx,
+    const struct text_art_config *config
+) {
     const char *raw_ramp = (config->ramp)
         ? config->ramp
         : TEXT_ART_ASCII_RAMP_STANDARD;
 
     size_t ramp_len = utf8_length(raw_ramp);
 
+    // There's only one renderer for now
+    const struct text_art_renderer *renderer = get_renderer(TEXT_ART_MODE_RAMP);
+    if (!renderer) return false;
+
     struct utf8_char_view *ramp = utf8_char_views(raw_ramp);
     if (!ramp) return false;
 
-    ctx->renderer = &ramp_renderer; // There's only one renderer for now
+    ctx->renderer = renderer;
     ctx->ramp = ramp;
     ctx->ramp_len = ramp_len;
     ctx->contrast = config->contrast;
