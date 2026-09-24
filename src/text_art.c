@@ -135,17 +135,13 @@ static bool text_art_context_init(
     struct text_art_context *ctx,
     const struct text_art_config *config
 ) {
-    const char *raw_ramp = (config->ramp)
-        ? config->ramp
-        : TEXT_ART_ASCII_RAMP_STANDARD;
-
-    size_t ramp_len = utf8_length(raw_ramp);
+    size_t ramp_len = utf8_length(config->ramp);
 
     // There's only one renderer for now
     const struct text_art_renderer *renderer = get_renderer(TEXT_ART_MODE_RAMP);
     if (!renderer) return false;
 
-    struct utf8_char_view *ramp = utf8_char_views(raw_ramp);
+    struct utf8_char_view *ramp = utf8_char_views(config->ramp);
     if (!ramp) return false;
 
     ctx->renderer = renderer;
@@ -213,6 +209,7 @@ bool text_art_create(
     assert(img->channels >= 1 && img->channels <= 4);
     assert(img->data != NULL);
     assert(config != NULL);
+    assert(config->ramp != NULL);
     assert(config->width > 0);
 
     struct text_art_context ctx;
@@ -220,9 +217,7 @@ bool text_art_create(
     int out_width = config->width;
     int out_height = (int)round(img->height * out_width / (img->width * 2.0));
 
-    size_t longest_glyph_size = utf8_max_width(
-        (config->ramp) ? config->ramp : TEXT_ART_ASCII_RAMP_STANDARD
-    );
+    size_t longest_glyph_size = utf8_max_width(config->ramp);
     assert(longest_glyph_size != 0);
 
     bool ok;
