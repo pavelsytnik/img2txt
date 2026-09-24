@@ -108,13 +108,13 @@ static resize_fn get_resize_func(enum image_resize_filter filter) {
 }
 
 bool image_resized(
-    struct image *out,
+    struct image *img,
     const struct image *src,
     int width,
     int height,
     enum image_resize_filter filter
 ) {
-    assert(out != NULL);
+    assert(img != NULL);
     assert(src != NULL);
     assert(src->width > 0);
     assert(src->height > 0);
@@ -126,11 +126,11 @@ bool image_resized(
     resize_fn resize = get_resize_func(filter);
     if (!resize) return false;
 
-    if (!image_init(out, width, height, src->channels)) {
+    if (!image_init(img, width, height, src->channels)) {
         return false;
     }
 
-    (*resize)(src, out);
+    (*resize)(src, img);
 
     return true;
 }

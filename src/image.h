@@ -17,7 +17,7 @@ struct image {
 };
 
 bool image_init(struct image *img, int width, int height, int channels);
-bool image_load(struct image *out, const char *filename);
+bool image_load(struct image *img, const char *filename);
 void image_destroy(struct image *img);
 
 uint8_t *image_pixel(const struct image *img, int x, int y);

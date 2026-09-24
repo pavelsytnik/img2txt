@@ -25,8 +25,8 @@ bool image_init(struct image *img, int width, int height, int channels) {
     return true;
 }
 
-bool image_load(struct image *out, const char *filename) {
-    assert(out != NULL);
+bool image_load(struct image *img, const char *filename) {
+    assert(img != NULL);
     assert(filename != NULL);
 
     int width, height, channels;
@@ -34,10 +34,10 @@ bool image_load(struct image *out, const char *filename) {
     stbi_uc *data = stbi_load(filename, &width, &height, &channels, 0);
     if (!data) return false;
 
-    out->width = width;
-    out->height = height;
-    out->channels = channels;
-    out->data = data;
+    img->width = width;
+    img->height = height;
+    img->channels = channels;
+    img->data = data;
 
     return true;
 }
