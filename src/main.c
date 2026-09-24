@@ -22,7 +22,7 @@
 
 struct arguments {
     const char *img_filename;
-    const char *output_filename;
+    const char *out_filename;
     const char *ramp;
     double contrast;
     int width;
@@ -33,7 +33,7 @@ struct arguments {
 
 static void arguments_init(struct arguments *args) {
     args->img_filename = NULL;
-    args->output_filename = NULL;
+    args->out_filename = NULL;
     args->ramp = TEXT_ART_ASCII_RAMP_STANDARD;
     args->contrast = 1.0;
     args->width = 60;
@@ -64,7 +64,7 @@ static bool parse_opt(int key, const char *arg, struct args_state *state) {
             break;
         }
         case 'o': {
-            args->output_filename = arg;
+            args->out_filename = arg;
             break;
         }
         case 't': {
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
 
     struct image img;
     struct text_art art;
-    char *txt_art_filename;
+    char *art_filename;
 
     if (!image_load(&img, args.img_filename)) {
         error("Image '%s' loading failed", args.img_filename);
@@ -196,16 +196,16 @@ int main(int argc, char **argv) {
         error("Text art creation failed");
     }
 
-    txt_art_filename = build_output_filename(
-        args.output_filename,
+    art_filename = build_output_filename(
+        args.out_filename,
         args.img_filename
     );
-    if (!txt_art_filename) {
+    if (!art_filename) {
         error("Output filename building failed");
     }
 
-    if (!text_art_save(&art, txt_art_filename)) {
-        error("Saving text art to '%s' failed", txt_art_filename);
+    if (!text_art_save(&art, art_filename)) {
+        error("Saving text art to '%s' failed", art_filename);
     }
 
     if (args.terminal_output) {
@@ -214,7 +214,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    free(txt_art_filename);
+    free(art_filename);
     text_art_destroy(&art);
     image_destroy(&img);
 
