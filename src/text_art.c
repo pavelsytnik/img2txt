@@ -25,7 +25,7 @@ struct text_art_context {
     struct utf8_char_view *ramp;
     size_t ramp_len;
     double contrast;
-    bool use_weighted_grayscale;
+    bool weighted_grayscale;
     enum image_resize_filter filter;
 };
 
@@ -111,7 +111,7 @@ static bool text_art_context_init(
     ctx->ramp = ramp;
     ctx->ramp_len = ramp_len;
     ctx->contrast = config->contrast;
-    ctx->use_weighted_grayscale = config->use_weighted_grayscale;
+    ctx->weighted_grayscale = config->weighted_grayscale;
     ctx->filter = (config->box_filter)
         ? IMAGE_RESIZE_FILTER_BOX
         : IMAGE_RESIZE_FILTER_NEAREST_NEIGHBOR;
@@ -147,7 +147,7 @@ static const struct utf8_char_view *pixel_to_glyph(
     const struct text_art_context *ctx
 ) {
     uint8_t px_light = pixel_to_grayscale(
-        pixel, channels, ctx->use_weighted_grayscale
+        pixel, channels, ctx->weighted_grayscale
     );
 
     px_light = adjust_contrast(px_light, ctx->contrast);

@@ -28,7 +28,7 @@ struct text_art_config {
     const char *ramp;
     int out_width;
     double contrast;
-    bool use_weighted_grayscale;
+    bool weighted_grayscale;
     bool box_filter;
 };
 

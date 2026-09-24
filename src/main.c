@@ -26,7 +26,7 @@ struct arguments {
     const char *ramp;
     double contrast;
     int width;
-    bool use_weighted_grayscale;
+    bool weighted_grayscale;
     bool terminal_output;
     bool box_filter;
 };
@@ -37,7 +37,7 @@ static void arguments_init(struct arguments *args) {
     args->ramp = TEXT_ART_ASCII_RAMP_STANDARD;
     args->contrast = 1.0;
     args->width = 60;
-    args->use_weighted_grayscale = true;
+    args->weighted_grayscale = true;
     args->terminal_output = false;
     args->box_filter = true;
 }
@@ -83,7 +83,7 @@ static bool parse_opt(int key, const char *arg, struct args_state *state) {
             break;
         }
         case KEY_NO_WEIGHTED_GRAYSCALE: {
-            args->use_weighted_grayscale = false;
+            args->weighted_grayscale = false;
             break;
         }
         case KEY_NO_BOX_FILTER: {
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
             .ramp = args.ramp,
             .out_width = args.width,
             .contrast = args.contrast,
-            .use_weighted_grayscale = args.use_weighted_grayscale,
+            .weighted_grayscale = args.weighted_grayscale,
             .box_filter = args.box_filter
         }
     )) {
