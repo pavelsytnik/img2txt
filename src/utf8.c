@@ -5,10 +5,13 @@
 
 #include "utf8.h"
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 size_t utf8_length(const char *s) {
+    assert(s != NULL);
+
     size_t n = 0;
 
     while (*s) {
@@ -20,6 +23,8 @@ size_t utf8_length(const char *s) {
 }
 
 size_t utf8_char_length(const char *s) {
+    assert(s != NULL);
+
     uint8_t c = (uint8_t)*s;
 
     if ((c & 0x80) == 0x00) return 1;
@@ -31,6 +36,8 @@ size_t utf8_char_length(const char *s) {
 }
 
 struct utf8_char_view *utf8_char_views(const char *s) {
+    assert(s != NULL);
+
     size_t n = utf8_length(s);
 
     struct utf8_char_view *views = malloc(n * sizeof(*views));
@@ -40,6 +47,8 @@ struct utf8_char_view *utf8_char_views(const char *s) {
     for (size_t i = 0; i < n; i++) {
         views[i].data = c;
         views[i].size = utf8_char_length(c);
+
+        assert(views[i].size != 0);
 
         c += views[i].size;
     }
