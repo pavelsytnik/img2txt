@@ -43,7 +43,7 @@ struct text_art_renderer {
     );
 };
 
-static size_t utf8_longest_char_length(const char *s) {
+static size_t utf8_max_width(const char *s) {
     size_t max = 0;
 
     while (*s) {
@@ -70,11 +70,52 @@ static void image_size_ramp(
     *img_height = art_height;
 }
 
+static uint8_t adjust_contrast(uint8_t v, double contrast) {
+    double f = (v - 128.0) * contrast + 128.0;
+    if (f < 0.0) f = 0.0;
+    if (f > 255.0) f = 255.0;
+    return (uint8_t)f;
+}
+
+static uint8_t pixel_to_grayscale(const uint8_t *pixel, int channels, bool weighted) {
+    if (channels < 3) {
+        return pixel[0];
+    }
+    if (weighted) {
+        return (uint8_t)(0.299 * pixel[0] + 0.587 * pixel[1] + 0.114 * pixel[2]);
+    }
+    return (uint8_t)((pixel[0] + pixel[1] + pixel[2]) / 3);
+}
+
+static const struct utf8_char_view *pixel_to_glyph(
+    const uint8_t *pixel,
+    int channels,
+    const struct text_art_context *ctx
+) {
+    uint8_t px_light = pixel_to_grayscale(
+        pixel, channels, ctx->weighted_grayscale
+    );
+
+    px_light = adjust_contrast(px_light, ctx->contrast);
+
+    return &ctx->ramp[px_light * ctx->ramp_len / 256];
+}
+
 static void render_ramp(
     char *buffer,
     const struct image *img,
     const struct text_art_context *ctx
-);
+) {
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+            const uint8_t *pixel = image_pixel(img, x, y);
+            const struct utf8_char_view *glyph = pixel_to_glyph(pixel, img->channels, ctx);
+
+            memcpy(buffer, glyph->data, glyph->size);
+            buffer += glyph->size;
+        }
+    }
+}
 
 static const struct text_art_renderer *get_renderer(enum text_art_mode mode) {
     static const struct text_art_renderer ramp_renderer = {
@@ -124,37 +165,6 @@ static void text_art_context_destroy(struct text_art_context *ctx) {
     memset(ctx, 0, sizeof(struct text_art_context));
 }
 
-static uint8_t adjust_contrast(uint8_t v, double contrast) {
-    double f = (v - 128.0) * contrast + 128.0;
-    if (f < 0.0) f = 0.0;
-    if (f > 255.0) f = 255.0;
-    return (uint8_t)f;
-}
-
-static uint8_t pixel_to_grayscale(const uint8_t *pixel, int channels, bool weighted) {
-    if (channels < 3) {
-        return pixel[0];
-    }
-    if (weighted) {
-        return (uint8_t)(0.299 * pixel[0] + 0.587 * pixel[1] + 0.114 * pixel[2]);
-    }
-    return (uint8_t)((pixel[0] + pixel[1] + pixel[2]) / 3);
-}
-
-static const struct utf8_char_view *pixel_to_glyph(
-    const uint8_t *pixel,
-    int channels,
-    const struct text_art_context *ctx
-) {
-    uint8_t px_light = pixel_to_grayscale(
-        pixel, channels, ctx->weighted_grayscale
-    );
-
-    px_light = adjust_contrast(px_light, ctx->contrast);
-
-    return &ctx->ramp[px_light * ctx->ramp_len / 256];
-}
-
 static bool text_art_init(struct text_art *art, int width, int height, size_t max_glyph_bytes) {
     size_t buffer_size = (size_t)width * height * max_glyph_bytes + 1;
 
@@ -168,22 +178,6 @@ static bool text_art_init(struct text_art *art, int width, int height, size_t ma
     art->buffer = buffer;
 
     return true;
-}
-
-static void render_ramp(
-    char *buffer,
-    const struct image *img,
-    const struct text_art_context *ctx
-) {
-    for (int y = 0; y < img->height; y++) {
-        for (int x = 0; x < img->width; x++) {
-            const uint8_t *pixel = image_pixel(img, x, y);
-            const struct utf8_char_view *glyph = pixel_to_glyph(pixel, img->channels, ctx);
-
-            memcpy(buffer, glyph->data, glyph->size);
-            buffer += glyph->size;
-        }
-    }
 }
 
 static bool text_art_populate(
@@ -219,14 +213,14 @@ bool text_art_create(
     assert(img->channels >= 1 && img->channels <= 4);
     assert(img->data != NULL);
     assert(config != NULL);
-    assert(config->out_width > 0);
+    assert(config->width > 0);
 
     struct text_art_context ctx;
 
-    int out_width = config->out_width;
+    int out_width = config->width;
     int out_height = (int)round(img->height * out_width / (img->width * 2.0));
 
-    size_t longest_glyph_size = utf8_longest_char_length(
+    size_t longest_glyph_size = utf8_max_width(
         (config->ramp) ? config->ramp : TEXT_ART_ASCII_RAMP_STANDARD
     );
     assert(longest_glyph_size != 0);

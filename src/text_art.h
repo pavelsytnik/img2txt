@@ -26,7 +26,7 @@ struct text_art {
 
 struct text_art_config {
     const char *ramp;
-    int out_width;
+    int width;
     double contrast;
     bool weighted_grayscale;
     bool box_filter;

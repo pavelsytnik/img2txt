@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
         &img,
         &(struct text_art_config) {
             .ramp = args.ramp,
-            .out_width = args.width,
+            .width = args.width,
             .contrast = args.contrast,
             .weighted_grayscale = args.weighted_grayscale,
             .box_filter = args.box_filter
