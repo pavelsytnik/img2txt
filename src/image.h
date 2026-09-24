@@ -12,7 +12,7 @@
 struct image {
     int width;
     int height;
-    int channel_count;
+    int channels;
     uint8_t *data;
 };
 

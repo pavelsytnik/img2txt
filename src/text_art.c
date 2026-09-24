@@ -178,7 +178,7 @@ static void render_ramp(
     for (int y = 0; y < img->height; y++) {
         for (int x = 0; x < img->width; x++) {
             const uint8_t *pixel = image_pixel(img, x, y);
-            const struct utf8_char_view *glyph = pixel_to_glyph(pixel, img->channel_count, ctx);
+            const struct utf8_char_view *glyph = pixel_to_glyph(pixel, img->channels, ctx);
 
             memcpy(buffer, glyph->data, glyph->size);
             buffer += glyph->size;
@@ -216,7 +216,7 @@ bool text_art_create(
     assert(img != NULL);
     assert(img->width > 0);
     assert(img->height > 0);
-    assert(img->channel_count >= 1 && img->channel_count <= 4);
+    assert(img->channels >= 1 && img->channels <= 4);
     assert(img->data != NULL);
     assert(config != NULL);
     assert(config->out_width > 0);

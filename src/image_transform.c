@@ -26,7 +26,7 @@ static void image_resize_nearest_neighbor(const struct image *src, struct image 
             const uint8_t *src_pixel = image_pixel(src, x0, y0);
             uint8_t *dst_pixel = image_pixel(dst, x, y);
 
-            memcpy(dst_pixel, src_pixel, dst->channel_count);
+            memcpy(dst_pixel, src_pixel, dst->channels);
         }
     } 
 }
@@ -35,7 +35,7 @@ static void image_resize_box(const struct image *src, struct image *dst) {
     double sx = (double)src->width / dst->width;
     double sy = (double)src->height / dst->height;
 
-    int channels = src->channel_count;
+    int channels = src->channels;
 
     for (int y = 0; y < dst->height; y++) {
         double y0 = y * sy;
@@ -118,7 +118,7 @@ bool image_resized(
     assert(src != NULL);
     assert(src->width > 0);
     assert(src->height > 0);
-    assert(src->channel_count >= 1 && src->channel_count <= 4);
+    assert(src->channels >= 1 && src->channels <= 4);
     assert(src->data != NULL);
     assert(width > 0);
     assert(height > 0);
@@ -126,7 +126,7 @@ bool image_resized(
     resize_fn resize = get_resize_func(filter);
     if (!resize) return false;
 
-    if (!image_init(out, width, height, src->channel_count)) {
+    if (!image_init(out, width, height, src->channels)) {
         return false;
     }
 

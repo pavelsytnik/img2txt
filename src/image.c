@@ -19,7 +19,7 @@ bool image_init(struct image *img, int width, int height, int channels) {
 
     img->width = width;
     img->height = height;
-    img->channel_count = channels;
+    img->channels = channels;
     img->data = data;
 
     return true;
@@ -36,7 +36,7 @@ bool image_load(struct image *out, const char *filename) {
 
     out->width = width;
     out->height = height;
-    out->channel_count = channels;
+    out->channels = channels;
     out->data = data;
 
     return true;
@@ -55,5 +55,5 @@ uint8_t *image_pixel(const struct image *img, int x, int y) {
     assert(x >= 0 && x < img->width);
     assert(y >= 0 && y < img->height);
 
-    return &img->data[(y * img->width + x) * img->channel_count];
+    return &img->data[(y * img->width + x) * img->channels];
 }
