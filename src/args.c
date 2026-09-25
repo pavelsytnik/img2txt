@@ -219,16 +219,26 @@ bool args_parse(const struct args_program *program, int argc, char const *const 
     assert(argc > 0);
     assert(argv != NULL);
 
-    struct args_state state = { 0, program->input };
+    struct args_parser parser = {
+        .program = program,
+        .state = &(struct args_state) {
+            .arg_num = 0,
+            .input = program->input
+        },
+        .argv = argv,
+        .argc = argc,
+        .argi = 1,
+        .subopt = 0,
+        .stop_options = false
+    };
 
-    if (!program->parser(ARGS_KEY_INIT, NULL, &state)) return false;
+    if (!program->parser(ARGS_KEY_INIT, NULL, parser.state)) return false;
 
-    struct args_parser parser = { program, &state, argv, argc, 1, 0, false };
-
-    while (args_parser_parse_next(&parser))
-        ;
+    while (args_parser_parse_next(&parser)) ;
 
     if (parser.argi < parser.argc) return false; // Not all arguments were processed
 
-    return program->parser(ARGS_KEY_END, NULL, &state);
+    if (!program->parser(ARGS_KEY_END, NULL, parser.state)) return false;
+
+    return true;
 }
