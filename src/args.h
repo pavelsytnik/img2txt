@@ -8,9 +8,9 @@
 
 #include <stdbool.h>
 
-#define ARGS_KEY_ARG 0x80000000
-#define ARGS_KEY_INIT 0x80000001
-#define ARGS_KEY_END 0x80000002
+#define ARGS_KEY_ARG  0x40000000
+#define ARGS_KEY_INIT 0x40000001
+#define ARGS_KEY_END  0x40000002
 
 struct args_option;
 struct args_program;
