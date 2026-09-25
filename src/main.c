@@ -43,7 +43,7 @@ static void arguments_init(struct arguments *args) {
 }
 
 static bool parse_opt(int key, const char *arg, struct args_state *state) {
-    struct arguments *args = state->data;
+    struct arguments *args = state->input;
 
     switch (key) {
         case 'w': {

@@ -227,7 +227,7 @@ bool args_parse(const struct args_program *program, int argc, char const *const 
     assert(argc > 0);
     assert(argv != NULL);
 
-    struct args_state state = { 0, program->data };
+    struct args_state state = { 0, program->input };
 
     if (!program->parser(ARGS_KEY_INIT, NULL, &state)) return false;
 

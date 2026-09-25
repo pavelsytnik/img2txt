@@ -27,12 +27,12 @@ struct args_option {
 struct args_program {
     const struct args_option *options;
     args_parser parser;
-    void *data;
+    void *input;
 };
 
 struct args_state {
     int arg_num;
-    void *data;
+    void *input;
 };
 
 bool args_parse(const struct args_program *program, int argc, char const *const *argv);
