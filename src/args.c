@@ -36,19 +36,6 @@ static bool longopts_match(const char *opt, const char *name) {
     return *name == '\0' && (*opt == '\0' || *opt == '=');
 }
 
-static const struct args_option *args_option_find_by_key(
-    const struct args_option *opts,
-    int key
-) {
-    for (int i = 0; opts[i].key; i++) {
-        if (opts[i].key == key) {
-            return &opts[i];
-        }
-    }
-
-    return NULL;
-}
-
 static bool args_parser_parse_longopt(struct args_parser *parser) {
     const char *name = parser->argv[parser->argi] + 2;
     const char *eq = strchr(name, '=');
@@ -138,10 +125,15 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
 static bool args_parser_parse_shortopt(struct args_parser *parser) {
     const char *optopt = parser->argv[parser->argi] + parser->subopt;
 
-    const struct args_option *opt = args_option_find_by_key(
-        parser->program->options,
-        optopt[0] & 0xFF
-    );
+    const struct args_option *opts = parser->program->options;
+    const struct args_option *opt = NULL;
+
+    for (int i = 0; opts[i].key; i++) {
+        if (opts[i].key == (optopt[0] & 0xFF)) {
+            opt = &opts[i];
+            break;
+        }
+    }
 
     if (!opt) {
         fprintf(stderr, "Unrecognized option '%c'\n", optopt[0]);
