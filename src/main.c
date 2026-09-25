@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
     struct arguments args;
 
     struct args_program program = { options, parse_opt, &args };
-    if (!args_parse(&program, argc, argv)) {
+    if (!args_parse(&program, argc, argv, ARGS_NO_EXIT)) {
         return EXIT_FAILURE;
     }
 

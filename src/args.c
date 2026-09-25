@@ -19,6 +19,7 @@
 struct args_parser {
     const struct args_program *program;
     struct args_state *state;
+    unsigned flags;
     const char *const *argv;
     int argc;
     int argi;
@@ -212,7 +213,18 @@ static bool args_parser_parse_next(struct args_parser *parser) {
     return args_parser_parse_arg(parser);
 }
 
-bool args_parse(const struct args_program *program, int argc, char const *const *argv) {
+// It's a temporary solution
+static bool args_error(bool should_exit) {
+    if (should_exit) exit(EXIT_FAILURE);
+    return false;
+}
+
+bool args_parse(
+    const struct args_program *program,
+    int argc,
+    char const *const *argv,
+    unsigned flags
+) {
     assert(program != NULL);
     assert(program->options != NULL);
     assert(program->parser != NULL);
@@ -225,6 +237,7 @@ bool args_parse(const struct args_program *program, int argc, char const *const 
             .arg_num = 0,
             .input = program->input
         },
+        .flags = flags,
         .argv = argv,
         .argc = argc,
         .argi = 1,
@@ -232,13 +245,16 @@ bool args_parse(const struct args_program *program, int argc, char const *const 
         .stop_options = false
     };
 
-    if (!program->parser(ARGS_KEY_INIT, NULL, parser.state)) return false;
+    bool should_exit = (flags & ARGS_NO_EXIT) == 0;
+
+    if (!program->parser(ARGS_KEY_INIT, NULL, parser.state)) return args_error(should_exit);
 
     while (args_parser_parse_next(&parser)) ;
 
-    if (parser.argi < parser.argc) return false; // Not all arguments were processed
+    // Not all arguments were processed
+    if (parser.argi < parser.argc) return args_error(should_exit);
 
-    if (!program->parser(ARGS_KEY_END, NULL, parser.state)) return false;
+    if (!program->parser(ARGS_KEY_END, NULL, parser.state)) return args_error(should_exit);
 
     return true;
 }

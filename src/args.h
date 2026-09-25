@@ -12,6 +12,8 @@
 #define ARGS_KEY_INIT 0x40000001
 #define ARGS_KEY_END  0x40000002
 
+#define ARGS_NO_EXIT 0x01u
+
 struct args_option;
 struct args_program;
 struct args_state;
@@ -35,6 +37,11 @@ struct args_state {
     void *input;
 };
 
-bool args_parse(const struct args_program *program, int argc, char const *const *argv);
+bool args_parse(
+    const struct args_program *program,
+    int argc,
+    char const *const *argv,
+    unsigned flags
+);
 
 #endif // args__h_
