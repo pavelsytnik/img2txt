@@ -18,7 +18,7 @@
 
 struct args_parser {
     const struct args_program *program;
-    struct args_state *state;
+    struct args_state state;
     unsigned flags;
     const char *const *argv;
     int argc;
@@ -115,7 +115,7 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
         }
     }
 
-    if (!parser->program->parser(opt->key, optarg, parser->state)) {
+    if (!parser->program->parser(opt->key, optarg, &parser->state)) {
         return false;
     }
 
@@ -155,7 +155,7 @@ static bool args_parser_parse_shortopt(struct args_parser *parser) {
         }
     }
 
-    if (!parser->program->parser(opt->key, optarg, parser->state)) {
+    if (!parser->program->parser(opt->key, optarg, &parser->state)) {
         return false;
     }
 
@@ -172,13 +172,13 @@ static bool args_parser_parse_arg(struct args_parser *parser) {
     if (!parser->program->parser(
         ARGS_KEY_ARG,
         parser->argv[parser->argi],
-        parser->state
+        &parser->state
     )) {
         return false;
     }
 
     parser->argi++;
-    parser->state->arg_num++;
+    parser->state.arg_num++;
     return true;
 }
 
@@ -233,7 +233,7 @@ bool args_parse(
 
     struct args_parser parser = {
         .program = program,
-        .state = &(struct args_state) {
+        .state = {
             .arg_num = 0,
             .input = program->input
         },
@@ -247,14 +247,14 @@ bool args_parse(
 
     bool should_exit = (flags & ARGS_NO_EXIT) == 0;
 
-    if (!program->parser(ARGS_KEY_INIT, NULL, parser.state)) return args_error(should_exit);
+    if (!program->parser(ARGS_KEY_INIT, NULL, &parser.state)) return args_error(should_exit);
 
     while (args_parser_parse_next(&parser)) ;
 
     // Not all arguments were processed
     if (parser.argi < parser.argc) return args_error(should_exit);
 
-    if (!program->parser(ARGS_KEY_END, NULL, parser.state)) return args_error(should_exit);
+    if (!program->parser(ARGS_KEY_END, NULL, &parser.state)) return args_error(should_exit);
 
     return true;
 }
