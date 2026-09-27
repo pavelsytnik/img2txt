@@ -235,11 +235,21 @@ static bool args_parser_init(
 }
 
 static bool args_parser_finalize(struct args_parser *parser) {
-    if (parser->argi == parser->argc) { // All arguments have been consumed
-        return parser->program->parser(ARGS_KEY_END, NULL, &parser->state);
-    } else {
-        return false;
+    bool ok = parser->argi == parser->argc;
+
+    // All arguments have been consumed
+    if (ok) {
+        ok = parser->program->parser(ARGS_KEY_END, NULL, &parser->state);
     }
+
+    if (!ok) {
+        parser->program->parser(ARGS_KEY_ERR, NULL, &parser->state);
+    }
+
+    // It's called anyway
+    parser->program->parser(ARGS_KEY_FINI, NULL, &parser->state);
+
+    return ok;
 }
 
 bool args_parse(
