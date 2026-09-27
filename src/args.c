@@ -220,6 +220,35 @@ static bool args_error(const struct args_state *state) {
     return false;
 }
 
+static bool args_parser_init(
+    struct args_parser *parser,
+    const struct args_program *program,
+    int argc,
+    char const *const *argv,
+    unsigned flags
+) {
+    parser->program = program;
+    parser->state.arg_num = 0;
+    parser->state.input = program->input;
+    parser->state.priv = parser;
+    parser->flags = flags;
+    parser->argv = argv;
+    parser->argc = argc;
+    parser->argi = 1;
+    parser->subopt = 0;
+    parser->stop_options = false;
+
+    return program->parser(ARGS_KEY_INIT, NULL, &parser->state);
+}
+
+static bool args_parser_finalize(struct args_parser *parser) {
+    if (parser->argi == parser->argc) { // All arguments have been consumed
+        return parser->program->parser(ARGS_KEY_END, NULL, &parser->state);
+    } else {
+        return args_error(&parser->state);
+    }
+}
+
 bool args_parse(
     const struct args_program *program,
     int argc,
@@ -232,34 +261,16 @@ bool args_parse(
     assert(argc > 0);
     assert(argv != NULL);
 
-    struct args_parser parser = {
-        .program = program,
-        .state = {
-            .arg_num = 0,
-            .input = program->input,
-            .priv = &parser
-        },
-        .flags = flags,
-        .argv = argv,
-        .argc = argc,
-        .argi = 1,
-        .subopt = 0,
-        .stop_options = false
-    };
-
+    struct args_parser parser;
     bool ok;
 
-    ok = program->parser(ARGS_KEY_INIT, NULL, &parser.state);
+    ok = args_parser_init(&parser, program, argc, argv, flags);
 
     while (ok) {
         ok = args_parser_parse_next(&parser);
     }
 
-    if (parser.argi == parser.argc) { // All arguments have been consumed
-        ok = program->parser(ARGS_KEY_END, NULL, &parser.state);
-    } else {
-        ok = args_error(&parser.state);
-    }
+    ok = args_parser_finalize(&parser);
 
     return ok;
 }
