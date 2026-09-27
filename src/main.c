@@ -147,14 +147,15 @@ static char *build_output_filename(
 }
 
 int main(int argc, char **argv) {
+
 #ifdef _WIN32
-    argv = win32_argv_fetch();
+    if (!(argv = win32_argv_fetch())) {
+        fprintf(stderr, "Command-line argument fetching failed\n");
+        return EXIT_FAILURE;
+    }
+
     win32_console_enable_utf8();
 #endif
-
-    if (argc < 2) {
-        usage();
-    }
 
     struct args_option options[] = {
         { 'w', "width", "INT" },
@@ -168,21 +169,30 @@ int main(int argc, char **argv) {
     };
 
     struct arguments args;
-
     struct args_program program = { options, parse_opt, &args };
-    if (!args_parse(&program, argc, argv, ARGS_NO_EXIT)) {
-        return EXIT_FAILURE;
-    }
 
     struct image img;
     struct text_art art;
     char *art_filename;
 
-    if (!image_load(&img, args.img_filename)) {
-        error("Image '%s' loading failed", args.img_filename);
+    bool ok;
+
+    if (argc < 2) {
+        usage(); // It exits execution
     }
 
-    if (!text_art_create(
+    ok = args_parse(&program, argc, argv, ARGS_NO_EXIT);
+    if (!ok) {
+        goto end;
+    }
+
+    ok = image_load(&img, args.img_filename);
+    if (!ok) {
+        fprintf(stderr, "Image '%s' loading failed\n", args.img_filename);
+        goto end;
+    }
+
+    ok = text_art_create(
         &art,
         &img,
         &(struct text_art_config) {
@@ -192,35 +202,46 @@ int main(int argc, char **argv) {
             .weighted_grayscale = args.weighted_grayscale,
             .box_filter = args.box_filter
         }
-    )) {
-        error("Text art creation failed");
+    );
+    if (!ok) {
+        fprintf(stderr, "Text art creation failed\n");
+        goto img_cleanup;
     }
 
     art_filename = build_output_filename(
         args.out_filename,
         args.img_filename
     );
-    if (!art_filename) {
-        error("Output filename building failed");
-    }
 
-    if (!text_art_save(&art, art_filename)) {
-        error("Saving text art to '%s' failed", art_filename);
+    // The following code preserves any previous error.
+
+    if (art_filename) {
+        if (!text_art_save(&art, art_filename)) {
+            ok = false;
+            fprintf(stderr, "Saving text art to '%s' failed\n", art_filename);
+        }
+    } else {
+        ok = false;
+        fprintf(stderr, "Output filename building failed\n");
     }
 
     if (args.terminal_output) {
         if (!text_art_write(&art, stdout)) {
-            error("Text art output to stdout failed");
+            ok = false;
+            fprintf(stderr, "Text art output to stdout failed\n");
         }
     }
 
     free(art_filename);
     text_art_destroy(&art);
+img_cleanup:
     image_destroy(&img);
+
+end:
 
 #ifdef _WIN32
     win32_argv_free(argv);
 #endif
 
-    return EXIT_SUCCESS;
+    return (ok) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
