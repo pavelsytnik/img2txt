@@ -213,13 +213,6 @@ static bool args_parser_parse_next(struct args_parser *parser) {
     return args_parser_parse_arg(parser);
 }
 
-// It's a temporary solution
-static bool args_error(const struct args_state *state) {
-    const struct args_parser *parser = (const struct args_parser *)state->priv;
-    if (!(parser->flags & ARGS_NO_EXIT)) exit(EXIT_FAILURE);
-    return false;
-}
-
 static bool args_parser_init(
     struct args_parser *parser,
     const struct args_program *program,
@@ -245,7 +238,7 @@ static bool args_parser_finalize(struct args_parser *parser) {
     if (parser->argi == parser->argc) { // All arguments have been consumed
         return parser->program->parser(ARGS_KEY_END, NULL, &parser->state);
     } else {
-        return args_error(&parser->state);
+        return false;
     }
 }
 
@@ -266,11 +259,16 @@ bool args_parse(
 
     ok = args_parser_init(&parser, program, argc, argv, flags);
 
-    while (ok) {
-        ok = args_parser_parse_next(&parser);
+    if (ok) {
+        while (ok) {
+            ok = args_parser_parse_next(&parser);
+        }
+        ok = args_parser_finalize(&parser);
     }
 
-    ok = args_parser_finalize(&parser);
+    if (!ok && !(flags & ARGS_NO_EXIT)) {
+        exit(EXIT_FAILURE);
+    }
 
     return ok;
 }
