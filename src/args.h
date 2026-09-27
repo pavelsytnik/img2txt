@@ -35,6 +35,7 @@ struct args_program {
 struct args_state {
     int arg_num;
     void *input;
+    const void *priv;
 };
 
 bool args_parse(
