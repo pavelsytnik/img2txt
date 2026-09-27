@@ -247,14 +247,19 @@ bool args_parse(
         .stop_options = false
     };
 
-    if (!program->parser(ARGS_KEY_INIT, NULL, &parser.state)) return args_error(&parser.state);
+    bool ok;
 
-    while (args_parser_parse_next(&parser)) ;
+    ok = program->parser(ARGS_KEY_INIT, NULL, &parser.state);
 
-    // Not all arguments were processed
-    if (parser.argi < parser.argc) return args_error(&parser.state);
+    while (ok) {
+        ok = args_parser_parse_next(&parser);
+    }
 
-    if (!program->parser(ARGS_KEY_END, NULL, &parser.state)) return args_error(&parser.state);
+    if (parser.argi == parser.argc) { // All arguments have been consumed
+        ok = program->parser(ARGS_KEY_END, NULL, &parser.state);
+    } else {
+        ok = args_error(&parser.state);
+    }
 
-    return true;
+    return ok;
 }
