@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
 
     bool ok;
 
-    ok = args_parse(&program, argc, argv, ARGS_NO_EXIT);
+    ok = args_parse(&program, argc, (const char *const *)argv, ARGS_NO_EXIT);
     if (!ok) {
         goto end;
     }
