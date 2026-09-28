@@ -175,13 +175,13 @@ int main(int argc, char **argv) {
 #endif
 
     struct args_option options[] = {
-        { 'w', "width", "INT" },
-        { 'c', "contrast", "DOUBLE" },
-        { 't', "terminal", 0 },
-        { 'o', "output", "STRING" },
-        { 'r', "ramp", "STRING" },
-        { KEY_NO_WEIGHTED_GRAYSCALE, "no-weighted-grayscale", 0 },
-        { KEY_NO_BOX_FILTER, "no-box-filter", 0 },
+        { 'w', "width", true },
+        { 'c', "contrast", true },
+        { 't', "terminal", false },
+        { 'o', "output", true },
+        { 'r', "ramp", true },
+        { KEY_NO_WEIGHTED_GRAYSCALE, "no-weighted-grayscale", false },
+        { KEY_NO_BOX_FILTER, "no-box-filter", false },
         { 0 }
     };
 

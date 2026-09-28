@@ -20,17 +20,17 @@ struct args_option;
 struct args_program;
 struct args_state;
 
-typedef bool (*args_parser)(int key, const char *arg, struct args_state *state);
+typedef bool (*args_parser_fn)(int key, const char *arg, struct args_state *state);
 
 struct args_option {
     int key;
     const char *name;
-    const char *arg;
+    bool has_arg;
 };
 
 struct args_program {
     const struct args_option *options;
-    args_parser parser;
+    args_parser_fn parser;
     void *input;
 };
 

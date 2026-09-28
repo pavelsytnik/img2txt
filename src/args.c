@@ -103,7 +103,7 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
 
     const char *optarg = NULL;
 
-    if (opt->arg) {
+    if (opt->has_arg) {
         if (eq) {
             optarg = eq + 1;
         } else if (parser->argi + 1 < parser->argc) {
@@ -143,7 +143,7 @@ static bool args_parser_parse_shortopt(struct args_parser *parser) {
 
     const char *optarg = NULL;
 
-    if (opt->arg) {
+    if (opt->has_arg) {
         if (optopt[1]) {
             optarg = &optopt[1];
         } else if (parser->argi + 1 < parser->argc) {
@@ -159,7 +159,7 @@ static bool args_parser_parse_shortopt(struct args_parser *parser) {
         return false;
     }
 
-    if (opt->arg || !optopt[1]) {
+    if (opt->has_arg || !optopt[1]) {
         parser->subopt = 0;
         parser->argi++;
     } else {
