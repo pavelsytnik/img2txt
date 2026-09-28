@@ -79,18 +79,18 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
         }
 
         if (!opt) {
-            fprintf(stderr, "Unrecognized option '%.*s'\n", (int)name_len, name);
+            fprintf(stderr, "Unrecognized option '--%.*s'\n", (int)name_len, name);
             return false;
         }
 
         if (ambig) {
             flockfile(stderr);
-            fprintf(stderr, "Ambiguous option '%.*s'", (int)name_len, name);
+            fprintf(stderr, "Ambiguous option '--%.*s'", (int)name_len, name);
             if (ambig_set) {
                 fprintf(stderr, "; Possibilities:");
                 for (int i = 0; opts[i].key; i++) {
                     if (ambig_set[i]) {
-                        fprintf(stderr, " '%s'", opts[i].name);
+                        fprintf(stderr, " '--%s'", opts[i].name);
                     }
                 }
                 free(ambig_set);
@@ -110,7 +110,7 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
             parser->argi++;
             optarg = parser->argv[parser->argi];
         } else {
-            fprintf(stderr, "Option '%s' requires an argument\n", opt->name);
+            fprintf(stderr, "Option '--%s' requires an argument\n", opt->name);
             return false;
         }
     }
@@ -137,7 +137,7 @@ static bool args_parser_parse_shortopt(struct args_parser *parser) {
     }
 
     if (!opt) {
-        fprintf(stderr, "Unrecognized option '%c'\n", optopt[0]);
+        fprintf(stderr, "Unrecognized option '-%c'\n", optopt[0]);
         return false;
     }
 
@@ -150,7 +150,7 @@ static bool args_parser_parse_shortopt(struct args_parser *parser) {
             parser->argi++;
             optarg = parser->argv[parser->argi];
         } else {
-            fprintf(stderr, "Option '%c' requires an argument\n", optopt[0]);
+            fprintf(stderr, "Option '-%c' requires an argument\n", optopt[0]);
             return false;
         }
     }

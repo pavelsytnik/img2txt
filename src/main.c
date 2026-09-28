@@ -50,7 +50,7 @@ static bool parse_opt(int key, const char *arg, struct args_state *state) {
             int parsed_arg = atoi(arg);
 
             if (parsed_arg <= 0) {
-                fprintf(stderr, "Width value must be a positive integer\n");
+                fprintf(stderr, "Width must be a positive integer\n");
                 return false;
             }
 
@@ -77,7 +77,7 @@ static bool parse_opt(int key, const char *arg, struct args_state *state) {
             } else if (!strcmp(arg, "block")) {
                 args->ramp = TEXT_ART_BLOCK_RAMP;
             } else {
-                fprintf(stderr, "Invalid --ramp value\n");
+                fprintf(stderr, "Invalid ramp '%s' (expected 'ascii' or 'block')\n", arg);
                 return false;
             }
             break;
@@ -94,7 +94,7 @@ static bool parse_opt(int key, const char *arg, struct args_state *state) {
             if (state->arg_num == 0) {
                 args->img_filename = arg;
             } else {
-                fprintf(stderr, "Too many arguments provided\n");
+                fprintf(stderr, "Expected exactly one input file\n");
                 return false;
             }
             break;
@@ -105,7 +105,7 @@ static bool parse_opt(int key, const char *arg, struct args_state *state) {
         }
         case ARGS_KEY_END: {
             if (state->arg_num < 1) {
-                fprintf(stderr, "<IMG_FILENAME> argument is missing\n");
+                fprintf(stderr, "Missing <IMG_FILENAME>\n");
                 return false;
             }
             break;
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 
 #ifdef _WIN32
     if (!(argv = win32_argv_fetch())) {
-        fprintf(stderr, "Command-line argument fetching failed\n");
+        fprintf(stderr, "Failed to fetch command-line arguments\n");
         return EXIT_FAILURE;
     }
 
@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
 
     ok = image_load(&img, args.img_filename);
     if (!ok) {
-        fprintf(stderr, "Image '%s' loading failed\n", args.img_filename);
+        fprintf(stderr, "Failed to load image '%s'\n", args.img_filename);
         goto end;
     }
 
@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
         }
     );
     if (!ok) {
-        fprintf(stderr, "Text art creation failed\n");
+        fprintf(stderr, "Failed to create text art\n");
         goto img_cleanup;
     }
 
@@ -218,17 +218,17 @@ int main(int argc, char **argv) {
     if (art_filename) {
         if (!text_art_save(&art, art_filename)) {
             ok = false;
-            fprintf(stderr, "Saving text art to '%s' failed\n", art_filename);
+            fprintf(stderr, "Failed to save text art to '%s'\n", art_filename);
         }
     } else {
         ok = false;
-        fprintf(stderr, "Output filename building failed\n");
+        fprintf(stderr, "Failed to build text art filename\n");
     }
 
     if (args.terminal_output) {
         if (!text_art_write(&art, stdout)) {
             ok = false;
-            fprintf(stderr, "Text art output to stdout failed\n");
+            fprintf(stderr, "Failed to write text art to stdout\n");
         }
     }
 
