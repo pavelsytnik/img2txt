@@ -6,7 +6,6 @@
 #include "args.h"
 #include "image.h"
 #include "text_art.h"
-#include "util.h"
 
 #ifdef _WIN32
   #include "win32.h"
@@ -30,6 +29,18 @@ struct arguments {
     bool terminal_output;
     bool box_filter;
 };
+
+static const char usage_msg[] =
+    "Usage: img2txt [OPTIONS] <IMG_FILENAME>\n"
+    "\n"
+    "Options:\n"
+    "  -w, --width=INT              Text art width in characters\n"
+    "  -c, --contrast=DOUBLE        Text art contrast\n"
+    "  -t, --terminal               Print art to the terminal\n"
+    "  -o, --output=STRING          Output filename\n"
+    "  -r, --ramp=STRING            Character ramp. Available values are 'ascii' and 'block'\n"
+    "      --no-weighted-grayscale  Disable weighted grayscale\n"
+    "      --no-box-filter          Disable box filtering\n";
 
 static void arguments_init(struct arguments *args) {
     args->img_filename = NULL;
@@ -148,6 +159,12 @@ static char *build_output_filename(
 
 int main(int argc, char **argv) {
 
+    // Temporary help handling until `args` provides automatic help.
+    if (argc < 2) {
+        fprintf(stdout, "%s", usage_msg);
+        return EXIT_SUCCESS;
+    }
+
 #ifdef _WIN32
     if (!(argv = win32_argv_fetch())) {
         fprintf(stderr, "Failed to fetch command-line arguments\n");
@@ -176,10 +193,6 @@ int main(int argc, char **argv) {
     char *art_filename;
 
     bool ok;
-
-    if (argc < 2) {
-        usage(); // It exits execution
-    }
 
     ok = args_parse(&program, argc, argv, ARGS_NO_EXIT);
     if (!ok) {
