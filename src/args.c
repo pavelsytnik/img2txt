@@ -17,16 +17,17 @@
 #endif
 
 struct args_parser {
-    const struct args_program *program;
-    struct args_state state;
-    unsigned flags;
-    const char *const *argv;
-    int argc;
-    int argi;
-    int subopt;
-    bool stop_options;
+    const struct args_program *program;  // Configuration
+    struct args_state state;             // State exposed to the callback
+    unsigned flags;                      // Behavior flags
+    const char *const *argv;             // Command-line arguments
+    int argc;                            // Argument count
+    int argi;                            // Current argument index
+    int subopt;                          // Position within the current short option
+    bool stop_options;                   // Whether option parsing has stopped
 };
 
+// Unlike strcmp(), handles options containing '='
 static bool longopts_match(const char *opt, const char *name) {
     while (*opt && *name && *opt != '=') {
         if (*opt++ != *name++) {
@@ -45,8 +46,9 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
 
     const struct args_option *opts = parser->program->options;
     const struct args_option *opt = NULL;
-    int option_count = 0;
+    int option_count = 0; // Used to count the size of ambig_set
 
+    // Find the option by its full long name
     for (int i = 0; opts[i].key; i++) {
         if (longopts_match(name, opts[i].name)) {
             opt = &opts[i];
@@ -55,6 +57,7 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
         option_count++;
     }
 
+    // Exact matching failed. Try to find the option by the abbreviation.
     if (!opt) {
         bool *ambig_set = NULL;
         bool ambig = false;
@@ -78,11 +81,13 @@ static bool args_parser_parse_longopt(struct args_parser *parser) {
             }
         }
 
+        // No option has been found
         if (!opt) {
             fprintf(stderr, "Unrecognized option '--%.*s'\n", (int)name_len, name);
             return false;
         }
 
+        // Several options have been found by the abbreviation
         if (ambig) {
             flockfile(stderr);
             fprintf(stderr, "Ambiguous option '--%.*s'", (int)name_len, name);
