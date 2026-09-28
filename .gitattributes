@@ -1,0 +1,5 @@
+*.jpeg binary
+*.jpg  binary
+*.png  binary
+
+third_party/stb_image/include/ linguist-vendored
