@@ -34,6 +34,18 @@ if(MSVC)
     )
 endif()
 
+if(UNIX)
+    # For flockfile() and funlockfile()
+    target_compile_definitions(img2txt PRIVATE
+        _POSIX_C_SOURCE=200809L
+    )
+
+    # For math functions
+    target_link_libraries(img2txt PRIVATE
+        m
+    )
+endif()
+
 target_link_libraries(img2txt PRIVATE
     stb_image
 )
