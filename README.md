@@ -3,6 +3,8 @@
 **img2txt** is a command-line tool that can convert PNG and JPEG images into a
 text-based art.
 
+The program compiles on Windows and Unix-like systems.
+
 ## Usage
 
 
